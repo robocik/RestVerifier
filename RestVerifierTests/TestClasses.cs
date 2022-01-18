@@ -18,6 +18,8 @@ public class TestParam:ITestParam
 class TestClient
 {
     public CompareRequestValidator RequestValidator { get; }
+
+    public ValidationContext Context => (ValidationContext)RequestValidator.Context;
     private Dictionary<string, Dictionary<string, object>> data = new();
     public TestClient(CompareRequestValidator requestValidator)
     {

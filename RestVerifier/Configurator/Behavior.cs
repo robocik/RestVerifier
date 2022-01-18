@@ -18,4 +18,9 @@ public sealed class Behavior
     {
         return default(P);
     }
+
+    public static G Generate<G>()
+    {
+        return default(G);
+    }
 }

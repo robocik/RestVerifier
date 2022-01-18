@@ -22,13 +22,24 @@ public class VerifierConfiguation
         return type.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public).Where(m => !m.IsSpecialName).ToArray();
     };
 
+    public Dictionary<Type, Delegate> ParameterTransforms { get; } = new();
+
     public Delegate? GetReturnTransform(Type type)
     {
-        if (ReturnTransforms.TryGetValue(type, out var transform))
+        return GetTransform(ReturnTransforms, type);
+    }
+
+    public Delegate? GetParameterTransform(Type type)
+    {
+        return GetTransform(ParameterTransforms, type);
+    }
+    private Delegate? GetTransform(Dictionary<Type, Delegate>  dict,Type type)
+    {
+        if (dict.TryGetValue(type, out var transform))
         {
             return transform;
         }
-        foreach (var configurationReturnTransform in ReturnTransforms)
+        foreach (var configurationReturnTransform in dict)
         {
             if (configurationReturnTransform.Key.IsAssignableFrom(type))
             {
@@ -79,9 +90,16 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
                 if (argument is MethodCallExpression mce)
                 {
 
-                    if (mce.Method.DeclaringType == typeof(Data) && mce.Method.Name == nameof(Data.Generate))
+                    if (mce.Method.DeclaringType == typeof(Behavior) )
                     {
+                        if (mce.Method.Name == nameof(Behavior.Generate))
+                        {
 
+                        }
+                        else if (mce.Method.Name == nameof(Behavior.Transform))
+                        {
+                            throw new InvalidOperationException("Cannot use Transform in Setup");
+                        }
                     }
                     else
                     {
@@ -138,10 +156,14 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
                 {
                     if (mce.Method.DeclaringType == typeof(Behavior) && mce.Method.Name == nameof(Behavior.Ignore))
                     {
-                        paramConfig.Ignore = true;
+                        paramConfig.VerifyBehavior = VerifyBehavior.Ignore;
                     }
                     else if (mce.Method.DeclaringType == typeof(Behavior) && mce.Method.Name == nameof(Behavior.Verify))
                     {
+                    }
+                    if (mce.Method.DeclaringType == typeof(Behavior) && mce.Method.Name == nameof(Behavior.Generate))
+                    {
+                        paramConfig.VerifyBehavior = VerifyBehavior.GenerateValue;
                     }
                     else if (mce.Method.DeclaringType == typeof(Behavior) && mce.Method.Name != nameof(Behavior.Transform))
                     {
@@ -149,6 +171,7 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
                     }
                     else
                     {
+                        paramConfig.VerifyBehavior = VerifyBehavior.Transform;
                         paramConfig.VerifyExpression = mce;
                     }
 
@@ -219,9 +242,15 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
         return this;
     }
 
-    public IGlobalSetupStarter<TClient> ReturnTransform<T>(Func<T, object> func)
+    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.ReturnTransform<T>(Func<T, object> func)
     {
         Configuation.ReturnTransforms[typeof(T)] = func;
+        return this;
+    }
+
+    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.ParameterTransform<T>(Func<T, object> func)
+    {
+        Configuation.ParameterTransforms[typeof(T)] = func;
         return this;
     }
 

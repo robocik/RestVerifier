@@ -5,6 +5,13 @@ using System.Reflection;
 
 namespace RestVerifier.Configurator;
 
+public enum VerifyBehavior
+{
+    Default,
+    GenerateValue,
+    Ignore,
+    Transform
+}
 public class ParameterConfiguration
 {
     public ParameterConfiguration(ParameterInfo parameter)
@@ -16,7 +23,9 @@ public class ParameterConfiguration
     public Expression? VerifyExpression { get; set; }
     public Expression? SetupExpression { get; set; }
 
-    public bool Ignore { get; set; }
+    public VerifyBehavior VerifyBehavior { get; set; } = VerifyBehavior.Default;
+
+    public bool Ignore => VerifyBehavior == VerifyBehavior.Ignore;
 
 }
 public class MethodConfiguration

@@ -98,7 +98,7 @@ public class RestVerifierEngineBase<TClient>
             ParameterConfiguration? paramConfig = null;
             if (methodConfig?.Parameters.TryGetValue(parameterInfo, out paramConfig) == true)
             {
-                paramValue.Ignore = paramConfig!.Ignore;
+                paramValue.Ignore = paramConfig!.VerifyBehavior==VerifyBehavior.Ignore;
             }
             paramValue.Value = EvaluateInitialValue(paramConfig,  parameterInfo);
 
@@ -123,9 +123,20 @@ public class RestVerifierEngineBase<TClient>
         return list.Select(x => x.Value).ToList();
     }
 
-    private static object? EvaluateVerifyValue(ParameterConfiguration? paramConfig,ParameterValue paramValue)
+    private object? EvaluateVerifyValue(ParameterConfiguration? paramConfig,ParameterValue paramValue)
     {
         var value = paramValue.Value;
+
+        var type=paramConfig?.Parameter.ParameterType??value?.GetType();
+        if (type != null)
+        {
+            var transform = _builder.Configuation.GetParameterTransform(type);
+            if (transform != null)
+            {
+                value = (object?)transform.DynamicInvoke(value);
+            }
+        }
+
         if (paramConfig?.VerifyExpression != null)
         {
             if (paramConfig!.VerifyExpression is MethodCallExpression mce)
@@ -152,7 +163,10 @@ public class RestVerifierEngineBase<TClient>
 
             }
         }
-
+        else if (paramConfig?.VerifyBehavior == VerifyBehavior.GenerateValue)
+        {
+            value = Validator.Creator.Create(paramConfig.Parameter.ParameterType);
+        }
         return value;
     }
 
@@ -163,18 +177,9 @@ public class RestVerifierEngineBase<TClient>
         {
             if (paramConfig!.SetupExpression is MethodCallExpression mce)
             {
-                if (mce.Method.DeclaringType == typeof(Data))
-                {
-                    if (mce.Method.Name == nameof(Data.Generate))
-                    {
-                    }
-                }
-                else
-                {
-                    var yu = Expression.Lambda(paramConfig.SetupExpression).Compile().DynamicInvoke();
-                    //var yu = ne.Constructor!.Invoke(ne.Arguments.Select(a => ((ConstantExpression)a).Value).ToArray());
-                    value = yu;
-                }
+                var yu = Expression.Lambda(paramConfig.SetupExpression).Compile().DynamicInvoke();
+                //var yu = ne.Constructor!.Invoke(ne.Arguments.Select(a => ((ConstantExpression)a).Value).ToArray());
+                value = yu;
             }
             else
             {

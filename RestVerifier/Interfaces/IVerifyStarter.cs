@@ -36,6 +36,8 @@ public interface IGlobalSetupStarter<TClient>
 
     IGlobalSetupStarter<TClient> CreateClient(Func<CompareRequestValidator,TClient> factory);
     IGlobalSetupStarter<TClient> ReturnTransform<T>(Func<T, object> func);
+
+    IGlobalSetupStarter<TClient> ParameterTransform<T>(Func<T, object> func);
 }
 
 public interface ISetupStarter<TClient>

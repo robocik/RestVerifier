@@ -18,8 +18,8 @@ public class VerifierConfigurationBuilderTests_Setup
     {
         var builder = new VerifierConfigurationBuilder<TestClient>();
         ISetupStarter<TestClient> starter = builder;
-        starter.Setup(c => c.GetMethod1(Data.Generate<int>(), "test value"));
-        starter.Setup(c => c.GetMethod2(Data.Generate<string>(), Data.Generate<decimal>(), Data.Generate<float>())).Skip();
+        starter.Setup(c => c.GetMethod1(Behavior.Generate<int>(), "test value"));
+        starter.Setup(c => c.GetMethod2(Behavior.Generate<string>(), Behavior.Generate<decimal>(), Behavior.Generate<float>())).Skip();
 
         Assert.AreEqual(2,builder.Configuation.Methods.Count);
         var method1 = builder.Configuation.Methods.Single(x => x.Key.Name==nameof(TestClient.GetMethod1));
@@ -49,8 +49,8 @@ public class VerifierConfigurationBuilderTests_Setup
     {
         var builder = new VerifierConfigurationBuilder<TestClient>();
         ISetupStarter<TestClient> starter = builder;
-        starter.Setup(c => c.GetMethod1(Data.Generate<int>(), "test value"));
-        starter.Setup(c => c.GetMethod2(Data.Generate<string>(), Data.Generate<decimal>(), Data.Generate<float>())).Skip();
+        starter.Setup(c => c.GetMethod1(Behavior.Generate<int>(), "test value"));
+        starter.Setup(c => c.GetMethod2(Behavior.Generate<string>(), Behavior.Generate<decimal>(), Behavior.Generate<float>())).Skip();
         
         var method1 = builder.Configuation.Methods.Single(x => x.Key.Name == nameof(TestClient.GetMethod1));
         Assert.IsFalse(method1.Value.Skip);
