@@ -12,132 +12,101 @@ namespace RestVerifier;
 
 
 
-public abstract class RestVerifierEngineBase<TClient> 
+public class RestVerifierEngineBase<TClient>
 {
+    private readonly VerifierConfigurationBuilder<TClient> _builder;
+
+    protected internal RestVerifierEngineBase(VerifierConfigurationBuilder<TClient> builder)
+    {
+        _builder = builder;
+    }
+
+    public static IGlobalSetupStarter<TClient> Create()
+    {
+        var builder = new VerifierConfigurationBuilder<TClient>();
+        return builder;
+    }
+
     protected CompareRequestValidator Validator { get; private set; } = null!;
-    
+
     public async Task TestService()
     {
-        Validator = CreateValidator();
-        var builder = new VerifierConfigurationBuilder<TClient>();
-        Configure(builder);
-
+        Validator = _builder.CreateValidator();
         await Invoke(async client =>
         {
-            try
+            var clientType = client.GetType();
+            MethodInfo[] methods = _builder.Configuation.GetMethodFunc(clientType);
+            for (var index = 0; index < methods.Length; index++)
             {
-                var methods = GetMethodsToVerify(client.GetType());
-                for (var index = 0; index < methods.Length; index++)
+                var methodInfo = methods[index];
+                try
                 {
-                    var methodInfo = methods[index];
-                    try
+                    if (methodInfo.Name == "ImportDefinitionsFromCsv")
                     {
-                        if (methodInfo.Name == "GetWebFormPdf")
-                        {
 
-                        }
-                        if (builder.Methods.TryGetValue(methodInfo, out var methodConfig))
-                        {
-                            if (methodConfig.Skip)
-                            {
-                                continue;
-                            }
-                        }
-                        ParameterInfo[] parameters = methodInfo.GetParameters();
-
-                        Console.WriteLine("METHOD: " + methodInfo.Name+" - " + index);
-                        Validator.Reset(methodConfig);
-
-                        Validator.RegisterClientReturnType(methodInfo.ReturnType);
-
-                        IList<object?> values = AddParameters(methodInfo,methodConfig, parameters);
-
-                        var returnObj = await InvokeMethod(methodInfo, client, values.ToArray());
-                        Validator.ValidateReturnValue(returnObj);
                     }
-                    catch (Exception e)
+                    if (_builder.Configuation.Methods.TryGetValue(methodInfo, out var methodConfig))
                     {
-                        Console.WriteLine(e);
-                        throw;
+                        if (methodConfig.Skip)
+                        {
+                            continue;
+                        }
                     }
-                    
+                    ParameterInfo[] parameters = methodInfo.GetParameters();
 
+                    Console.WriteLine("METHOD: " + methodInfo.Name + " - " + index);
+                    Validator.Reset(methodConfig);
+
+                    Validator.RegisterClientReturnType(methodInfo.ReturnType);
+
+                    IList<object?> values = AddParameters(methodInfo, methodConfig, parameters);
+
+                    var returnObj = await InvokeMethod(methodInfo, client, values.ToArray());
+                    if (methodInfo.Name == "GetCheckedOutRevisionComment")
+                    {
+
+                    }
+                    Validator.ValidateReturnValue(returnObj);
                 }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
+
+
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-            
         });
 
     }
 
-    protected virtual void Configure(IVerifierConfigurator<TClient> config)
-    {
-
-    }
+    
 
     
 
-    protected virtual MethodInfo[] GetMethodsToVerify(Type type)
-    {
-        return type.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public);
-    }
-
-    private IList<object?> AddParameters(MethodInfo method,MethodConfiguration? methodConfig, ParameterInfo[] parameters)
+    private IList<object?> AddParameters(MethodInfo method, MethodConfiguration? methodConfig, ParameterInfo[] parameters)
     {
         var list = new List<ParameterValue>();
         if (method.Name == "GetInternalIndices")
         {
-            
+
         }
         foreach (var parameterInfo in parameters)
         {
 
-            var value = Validator.Creator.Create(parameterInfo.ParameterType);
-            var paramValue = new ParameterValue(parameterInfo.Name!, value);
-            if (methodConfig?.Parameters.TryGetValue(parameterInfo, out var paramConfig) == true)
+            var paramValue = new ParameterValue(parameterInfo.Name!);
+            ParameterConfiguration? paramConfig = null;
+            if (methodConfig?.Parameters.TryGetValue(parameterInfo, out paramConfig) == true)
             {
-                if (paramConfig!.VerifyExpression is MethodCallExpression mce)
-                {
-                    if (mce.Method.DeclaringType == typeof(Behavior))
-                    {
-                        if (mce.Method.Name == nameof(Behavior.Transform))
-                        {
-                            UnaryExpression expression = (UnaryExpression)mce.Arguments[0];
-                            var exp1 = (LambdaExpression)expression.Operand;
-                            var yu = exp1.Compile().DynamicInvoke(value);
-                            paramValue.ValueToCompare = yu;
-                        }
-                    }
-                    else
-                    {
-                        var yu = Expression.Lambda(paramConfig.VerifyExpression).Compile().DynamicInvoke();
-                        //var yu = ne.Constructor!.Invoke(ne.Arguments.Select(a => ((ConstantExpression)a).Value).ToArray());
-                        paramValue.Value = paramValue.ValueToCompare = yu;
-                    }
-                }
-                else if (paramConfig.VerifyExpression is NewExpression ne)
-                {
-                    var yu = Expression.Lambda(ne).Compile().DynamicInvoke();
-                    //var yu = ne.Constructor!.Invoke(ne.Arguments.Select(a => ((ConstantExpression)a).Value).ToArray());
-                    paramValue.Value = paramValue.ValueToCompare = yu;
-                }
-                else if (paramConfig.VerifyExpression is ConditionalExpression ce)
-                {
-                    var yu = Expression.Lambda(ce).Compile().DynamicInvoke();
-                    //var yu = ne.Constructor!.Invoke(ne.Arguments.Select(a => ((ConstantExpression)a).Value).ToArray());
-                    paramValue.Value = paramValue.ValueToCompare = yu;
-                }
-
+                paramValue.Ignore = paramConfig!.Ignore;
             }
-            
-            OnParameterAdding(method,paramValue);
+            paramValue.Value = EvaluateInitialValue(paramConfig,  parameterInfo);
+
+            paramValue.ValueToCompare=EvaluateVerifyValue(paramConfig, paramValue);
+            _builder.Configuation.VerifyParameterAction?.Invoke(parameterInfo,paramValue);
             list.Add(paramValue);
-            
-            
+
+
         }
 
         object?[] arr;
@@ -154,17 +123,76 @@ public abstract class RestVerifierEngineBase<TClient>
         return list.Select(x => x.Value).ToList();
     }
 
+    private static object? EvaluateVerifyValue(ParameterConfiguration? paramConfig,ParameterValue paramValue)
+    {
+        var value = paramValue.Value;
+        if (paramConfig?.VerifyExpression != null)
+        {
+            if (paramConfig!.VerifyExpression is MethodCallExpression mce)
+            {
+                if (mce.Method.DeclaringType == typeof(Behavior))
+                {
+
+                    if (mce.Method.Name == nameof(Behavior.Transform))
+                    {
+                        UnaryExpression expression = (UnaryExpression)mce.Arguments[0];
+                        var exp1 = (LambdaExpression)expression.Operand;
+                        value  = exp1.Compile().DynamicInvoke(value);
+                    }
+                }
+                else
+                {
+                    value = Expression.Lambda(paramConfig.VerifyExpression).Compile().DynamicInvoke();
+
+                }
+            }
+            else
+            {
+                value = Expression.Lambda(paramConfig.VerifyExpression).Compile().DynamicInvoke();
+
+            }
+        }
+
+        return value;
+    }
+
+    private object? EvaluateInitialValue(ParameterConfiguration? paramConfig, ParameterInfo parameterInfo)
+    {
+        object? value = null;
+        if (paramConfig?.SetupExpression != null)
+        {
+            if (paramConfig!.SetupExpression is MethodCallExpression mce)
+            {
+                if (mce.Method.DeclaringType == typeof(Data))
+                {
+                    if (mce.Method.Name == nameof(Data.Generate))
+                    {
+                    }
+                }
+                else
+                {
+                    var yu = Expression.Lambda(paramConfig.SetupExpression).Compile().DynamicInvoke();
+                    //var yu = ne.Constructor!.Invoke(ne.Arguments.Select(a => ((ConstantExpression)a).Value).ToArray());
+                    value = yu;
+                }
+            }
+            else
+            {
+                var yu = Expression.Lambda(paramConfig.SetupExpression).Compile().DynamicInvoke();
+                //var yu = ne.Constructor!.Invoke(ne.Arguments.Select(a => ((ConstantExpression)a).Value).ToArray());
+                value = yu;
+            }
+        }
+
+        if (value == null)
+        {
+            value = Validator.Creator.Create(parameterInfo.ParameterType);
+        }
+
+        return value;
+    }
 
 
-    protected virtual void OnParameterAdding(MethodInfo method, ParameterValue paramValue)
-    {
-    }
-    protected virtual CompareRequestValidator CreateValidator()
-    {
-        var objCreator = CreateObjectCreator();
-        var objTester = CreateObjectsComparer();
-        return new CompareRequestValidator(objTester, objCreator);
-    }
     protected virtual async Task<object?> InvokeMethod(MethodInfo methodInfo, object client, object?[] values)
     {
         var result = methodInfo.Invoke(client, values);
@@ -183,17 +211,13 @@ public abstract class RestVerifierEngineBase<TClient>
 
         return result;
     }
+
+
+    private  Task Invoke(Func<TClient, Task> action)
+    {
+        var client = _builder.CreateClient();
+        return action(client);
+    }
+
     
-
-    protected abstract Task Invoke(Func<TClient, Task> action);
-
-    protected virtual ITestObjectCreator CreateObjectCreator()
-    {
-        return new AutoFixtureObjectCreator();
-    }
-
-    protected virtual IObjectsComparer CreateObjectsComparer()
-    {
-        return new FluentAssertionComparer();
-    }
 }

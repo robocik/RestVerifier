@@ -2,11 +2,11 @@
 
 namespace RestVerifier
 {
-    public record ParameterValue(string Name,object? Value, bool Ignore = false)
+    public record ParameterValue(string Name)
     {
         public string Name { get; } = Name;
-        public object? Value { get; set; } = Value;
-        public object? ValueToCompare { get; set; } = Value;
-        public bool Ignore { get; set; } = Ignore;
+        public object? Value { get; set; } 
+        public object? ValueToCompare { get; set; }
+        public bool Ignore { get; set; } 
     }
 }

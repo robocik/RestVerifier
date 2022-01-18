@@ -14,7 +14,7 @@ public sealed class Behavior
         return default(P);
     }
 
-    public static P Transform<P, T>(Expression<Func<P, T>> transform)
+    public static P Transform<P>(Expression<Func<P,object>> transform)
     {
         return default(P);
     }

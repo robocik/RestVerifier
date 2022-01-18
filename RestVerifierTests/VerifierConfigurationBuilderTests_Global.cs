@@ -23,7 +23,7 @@ public class VerifierConfigurationBuilderTests_Global
     [Test]
     public void Parse_verify_parameter()
     {
-        Action<PropertyInfo, ParameterValue> func = (paramInfo, param) =>
+        Action<ParameterInfo, ParameterValue> func = (paramInfo, param) =>
         {
             if (param.Value is decimal)
             {
@@ -33,15 +33,15 @@ public class VerifierConfigurationBuilderTests_Global
         starter.VerifyParameter(func);
 
 
-        Assert.AreEqual(0,builder.Methods.Count);
-        Assert.IsNull(builder.GetMethodFunc);
-        Assert.IsNotNull(builder.VerifyParameterAction);
-        Assert.AreEqual(func,builder.VerifyParameterAction);
+        Assert.AreEqual(0,builder.Configuation.Methods.Count);
+        Assert.IsNotNull(builder.Configuation.VerifyParameterAction);
+        Assert.AreEqual(func,builder.Configuation.VerifyParameterAction);
     }
 
     [Test]
     public void Parse_get_methods()
     {
+        var oldFunc = builder.Configuation.GetMethodFunc;
         Func<Type, MethodInfo[]> func = (type) =>
         {
             return type.GetMethods();
@@ -49,9 +49,10 @@ public class VerifierConfigurationBuilderTests_Global
         starter.GetMethods(func);
 
 
-        Assert.AreEqual(0, builder.Methods.Count);
-        Assert.IsNotNull(builder.GetMethodFunc);
-        Assert.IsNull(builder.VerifyParameterAction);
-        Assert.AreEqual(func, builder.GetMethodFunc);
+        Assert.AreEqual(0, builder.Configuation.Methods.Count);
+        Assert.IsNotNull(builder.Configuation.GetMethodFunc);
+        Assert.AreNotEqual(oldFunc,builder.Configuation.GetMethodFunc);
+        Assert.IsNull(builder.Configuation.VerifyParameterAction);
+        Assert.AreEqual(func, builder.Configuation.GetMethodFunc);
     }
 }

@@ -9,16 +9,33 @@ public interface IVerifyStarter<TClient>
 {
     IVerifyTransform Verify<R>(Expression<Func<TClient, R>> method);
 
-    void Verify(Expression<Action<TClient>> method);
+    IVerifyTransform Verify(Expression<Action<TClient>> method);
 
     
 }
 
 public interface IGlobalSetupStarter<TClient>
 {
-    void GetMethods(Func<Type, MethodInfo[]> method);
+    IGlobalSetupStarter<TClient> GetMethods(Func<Type, MethodInfo[]> method);
 
-    void VerifyParameter(Action<PropertyInfo, ParameterValue> method);
+    IGlobalSetupStarter<TClient> VerifyParameter(Action<ParameterInfo, ParameterValue> method);
+
+    IGlobalSetupStarter<TClient> UseComparer<T>() where T:IObjectsComparer;
+
+    IGlobalSetupStarter<TClient> UseComparer<T>(T comparer) where T : IObjectsComparer;
+
+    IGlobalSetupStarter<TClient> UseObjectCreator<T>() where T : ITestObjectCreator;
+
+    IGlobalSetupStarter<TClient> UseObjectCreator<T>(T objCreator) where T : ITestObjectCreator;
+
+    IGlobalSetupStarter<TClient> ConfigureVerify(Action<IVerifyStarter<TClient>> config);
+
+    IGlobalSetupStarter<TClient> ConfigureSetup(Action<ISetupStarter<TClient>> config);
+
+    RestVerifierEngineBase<TClient> Build();
+
+    IGlobalSetupStarter<TClient> CreateClient(Func<CompareRequestValidator,TClient> factory);
+    IGlobalSetupStarter<TClient> ReturnTransform<T>(Func<T, object> func);
 }
 
 public interface ISetupStarter<TClient>
@@ -29,9 +46,4 @@ public interface ISetupStarter<TClient>
 public interface ISetupMethod
 {
     void Skip();
-}
-
-public interface IVerifierConfigurator<TClient> : IVerifyStarter<TClient>, IGlobalSetupStarter<TClient>, ISetupStarter<TClient>
-{
-
 }

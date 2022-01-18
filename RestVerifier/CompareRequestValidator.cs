@@ -15,19 +15,17 @@ namespace RestVerifier;
 
 public class CompareRequestValidator
 {
+    private readonly VerifierConfiguation _configuration;
     private IObjectsComparer _comparer;
     public ITestObjectCreator Creator { get; }
     private ValidationContext _context = new ();
     private Type? _returnType;
     private MethodConfiguration? _currentMethod;
-    public CompareRequestValidator()
+    
+    public CompareRequestValidator(VerifierConfiguation configuration, IObjectsComparer comparer,
+        ITestObjectCreator creator)
     {
-        _comparer = new FluentAssertionComparer();
-        Creator = new AutoFixtureObjectCreator();
-    }
-
-    public CompareRequestValidator(IObjectsComparer comparer, ITestObjectCreator creator)
-    {
+        _configuration = configuration;
         _comparer = comparer;
         Creator = creator;
     }
@@ -55,6 +53,14 @@ public class CompareRequestValidator
         if (_currentMethod?.ReturnTransform != null)
         {
             returnObject = (object?)_currentMethod.ReturnTransform.DynamicInvoke(returnObject);
+        }
+        else
+        {
+            var transform = _configuration.GetReturnTransform(_returnType);
+            if (transform!=null)
+            {
+                returnObject = (object?)transform.DynamicInvoke(returnObject);
+            }
         }
         return returnObject;
     }

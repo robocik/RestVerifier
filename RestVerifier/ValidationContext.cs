@@ -3,7 +3,7 @@
 namespace RestVerifier;
 
 
-class ValidationContext : IRemoteServiceContext
+public class ValidationContext : IRemoteServiceContext
 {
     private object? returnObject;
 
