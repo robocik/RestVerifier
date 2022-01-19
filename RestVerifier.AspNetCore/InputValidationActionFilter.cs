@@ -20,7 +20,7 @@ public class InputValidationActionFilter : IActionFilter
         {
             if (context.ActionDescriptor is ControllerActionDescriptor method)
             {
-                if (method.ActionName == "GetAllLogFile")
+                if (method.ActionName == "GetPdfFileWithCustomHeader")
                 {
                     
                 }

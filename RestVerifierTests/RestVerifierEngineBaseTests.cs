@@ -1,5 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using RestVerifier;
@@ -458,4 +461,81 @@ public class RestVerifierEngineBaseTests
         Assert.AreNotEqual("Local", val.Prop1);
         Assert.AreEqual("Local", valToCompare.Prop1);
     }
+
+    [Test]
+    public async Task on_method_executed_callback()
+    {
+        var list = new List<MethodInfo>();
+        _builder.OnMethodExecuted(c =>
+            {
+                list.Add(c.Method);
+            })
+            .ConfigureSetup(x =>
+            {
+                x.Setup(g => g.GetMethod1(Behavior.Generate<int>(), Behavior.Generate<string>())).Skip();
+            });
+        var engine = _builder.Build();
+        await engine.TestService();
+
+        Assert.AreEqual(2,list.Count);
+        Assert.IsFalse(list.Any(x=>x.Name==nameof(TestClient.GetMethod1)));
+    }
+
+    [Test]
+    public async Task on_method_executed_callback_abort_if_success()
+    {
+        var list = new List<MethodInfo>();
+        _builder.OnMethodExecuted(c =>
+            {
+                list.Add(c.Method);
+                if (c.Method.Name == nameof(TestClient.GetMethod2))
+                {
+                    c.Abort = true;
+                }
+            });
+        var engine = _builder.Build();
+        await engine.TestService();
+
+        Assert.AreEqual(2, list.Count);
+        Assert.IsFalse(list.Any(x => x.Name == nameof(TestClient.GetMethod3)));
+    }
+
+    [Test]
+    public void on_method_executed_callback_abort_if_exception()
+    {
+        var list = new List<MethodInfo>();
+        _builder.ConfigureVerify(c =>
+        {
+            c.Verify(k => k.GetMethod2(Behavior.Transform<string>(h => "wrong"),Behavior.Verify<decimal>(), Behavior.Verify<float>())).Returns<TestParam,string>(j=>j.Prop1);
+        });
+        _builder.OnMethodExecuted(c =>
+        {
+            list.Add(c.Method);
+            if (c.Exception is not null)
+            {
+                c.Abort = true;
+            }
+        });
+        var engine = _builder.Build();
+        var ex = Assert.ThrowsAsync<VerifierExecutionException>(async () => await engine.TestService());
+        Assert.IsTrue(ex.InnerException is TargetInvocationException);
+        Assert.AreEqual(nameof(TestClient.GetMethod2), ex.Method.Name);
+        Assert.IsFalse(list.Any(x => x.Name == nameof(TestClient.GetMethod3)));
+    }
+
+    [Test]
+    public void default_on_method_executed_callback_abort_if_exception()
+    {
+        _builder.ConfigureVerify(c =>
+        {
+            c.Verify(k => k.GetMethod2(Behavior.Transform<string>(h => "wrong"), Behavior.Verify<decimal>(), Behavior.Verify<float>())).Returns<TestParam, string>(j => j.Prop1);
+        });
+        var engine = _builder.Build();
+        var ex=Assert.ThrowsAsync<VerifierExecutionException>(async () => await engine.TestService());
+        Assert.IsTrue(ex.InnerException is TargetInvocationException);
+        Assert.AreEqual(nameof(TestClient.GetMethod2),ex.Method.Name);
+        
+        Assert.IsFalse(_client.Data.Keys.Any(x=>x==nameof(TestClient.GetMethod3)));
+    }
+
 }

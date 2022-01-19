@@ -38,7 +38,9 @@ public class RestVerifierEngineBase<TClient>
             MethodInfo[] methods = _builder.Configuation.GetMethodFunc(clientType);
             for (var index = 0; index < methods.Length; index++)
             {
+                
                 var methodInfo = methods[index];
+                var context = new ExecutionContext(methodInfo);
                 try
                 {
                     if (methodInfo.Name == "ImportDefinitionsFromCsv")
@@ -62,16 +64,28 @@ public class RestVerifierEngineBase<TClient>
                     IList<object?> values = AddParameters(methodInfo, methodConfig, parameters);
 
                     var returnObj = await InvokeMethod(methodInfo, client, values.ToArray());
-                    if (methodInfo.Name == "GetCheckedOutRevisionComment")
+                    if (methodInfo.Name == "GetPdfFileWithCustomHeader")
                     {
 
                     }
                     Validator.ValidateReturnValue(returnObj);
+                    context.Result = ExecutionResult.Success;
+                    InvokeMethodExecuted(context);
+                    if (context.Abort)
+                    {
+                        return;
+                    }
+                    
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
-                    throw;
+                    context.Result = ExecutionResult.Error;
+                    context.Exception = e;
+                    InvokeMethodExecuted(context);
+                    if (context.Abort)
+                    {
+                        throw new VerifierExecutionException(context.Method,e);
+                    }
                 }
 
 
@@ -80,9 +94,14 @@ public class RestVerifierEngineBase<TClient>
 
     }
 
-    
+    private void InvokeMethodExecuted(ExecutionContext context)
+    {
+        if (_builder.Configuation.MethodExecuted != null)
+        {
+            _builder.Configuation.MethodExecuted(context);
+        }
+    }
 
-    
 
     private IList<object?> AddParameters(MethodInfo method, MethodConfiguration? methodConfig, ParameterInfo[] parameters)
     {

@@ -33,6 +33,16 @@ public class VerifyTransformationBuilder : IVerifyTransform
         _methodConfig.Transform = method;
     }
 
+    public void Transform<P1, P2, P3, P4, P5>(Func<P1, P2, P3, P4, P5, object[]> method)
+    {
+        _methodConfig.Transform = method;
+    }
+
+    public void Transform<P1, P2, P3, P4, P5, P6>(Func<P1, P2, P3, P4, P5, P6, object[]> method)
+    {
+        _methodConfig.Transform = method;
+    }
+
     public void Returns<P, R>(Func<P,R> transform)
     {
         _methodConfig.ReturnTransform = transform;
