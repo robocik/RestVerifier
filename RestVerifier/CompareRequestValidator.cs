@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using RestVerifier.Configurator;
+using RestVerifier.Interfaces;
 
 namespace RestVerifier;
 
@@ -15,15 +16,14 @@ namespace RestVerifier;
 
 public class CompareRequestValidator
 {
-    private readonly VerifierConfiguation _configuration;
+    private readonly VerifierConfiguration _configuration;
     private IObjectsComparer _comparer;
     public ITestObjectCreator Creator { get; }
     private ValidationContext _context = new ();
     private Type? _returnType;
     private MethodConfiguration? _currentMethod;
     
-    public CompareRequestValidator(VerifierConfiguation configuration, IObjectsComparer comparer,
-        ITestObjectCreator creator)
+    public CompareRequestValidator(VerifierConfiguration configuration, IObjectsComparer comparer, ITestObjectCreator creator)
     {
         _configuration = configuration;
         _comparer = comparer;

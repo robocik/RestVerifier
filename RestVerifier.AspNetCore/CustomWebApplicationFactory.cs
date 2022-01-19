@@ -1,10 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
-using Moq;
 
 namespace RestVerifier.AspNetCore;
 
@@ -34,7 +30,7 @@ public class CustomWebApplicationFactory<TStartup>
     }
 
 
-    public CustomWebApplicationFactory(CompareRequestValidator requestValidator) : base(requestValidator)
+    public CustomWebApplicationFactory(CompareRequestValidator? requestValidator) : base(requestValidator)
     {
     }
 }

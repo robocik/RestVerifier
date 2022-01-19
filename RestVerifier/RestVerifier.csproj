@@ -12,9 +12,4 @@
 		<PackageReference Include="Moq" Version="4.16.1" />
 		<PackageReference Include="coverlet.collector" Version="3.1.0" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Interfaces\" />
-	  <Folder Include="Configurator\" />
-	</ItemGroup>
 </Project>

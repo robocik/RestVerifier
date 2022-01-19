@@ -1,4 +1,4 @@
-﻿namespace RestVerifier;
+﻿namespace RestVerifier.Interfaces;
 
 public interface IObjectsComparer
 {

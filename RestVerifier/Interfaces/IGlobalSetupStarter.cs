@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace RestVerifier.Interfaces;
 
@@ -21,12 +22,14 @@ public interface IGlobalSetupStarter<TClient>
 
     IGlobalSetupStarter<TClient> ConfigureSetup(Action<ISetupStarter<TClient>> config);
 
-    RestVerifierEngineBase<TClient> Build();
+    RestVerifierEngine<TClient> Build();
 
     IGlobalSetupStarter<TClient> CreateClient(Func<CompareRequestValidator, TClient> factory);
-    IGlobalSetupStarter<TClient> ReturnTransform<T>(Func<T, object> func);
+    IGlobalSetupStarter<TClient> ReturnTransform<T>(Func<T, object?> func);
 
-    IGlobalSetupStarter<TClient> ParameterTransform<T>(Func<T, object> func);
+    IGlobalSetupStarter<TClient> ParameterTransform<T>(Func<T, object?> func);
 
-    IGlobalSetupStarter<TClient> OnMethodExecuted(Action<ExecutionContext> func);
+    IGlobalSetupStarter<TClient> OnMethodExecuted(Func<ExecutionContext,Task> func);
+
+    IGlobalSetupStarter<TClient> OnMethodExecuting(Func<ExecutionContext, Task> func);
 }

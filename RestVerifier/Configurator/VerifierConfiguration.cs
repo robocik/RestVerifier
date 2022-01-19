@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace RestVerifier.Configurator;
 
-public class VerifierConfiguation
+public class VerifierConfiguration
 {
 
 
@@ -48,11 +49,18 @@ public class VerifierConfiguation
         return null;
     }
 
-    public Action<ExecutionContext>? MethodExecuted { get; internal set; } = context =>
+    public Func<ExecutionContext, Task> MethodExecuting { get; internal set; } = context =>
+    {
+        return Task.CompletedTask;
+    };
+
+    public Func<ExecutionContext, Task> MethodExecuted { get; internal set; } = context =>
     {
         if (context.Exception is not null)
         {
             context.Abort = true;
         }
+
+        return Task.CompletedTask;
     };
 }

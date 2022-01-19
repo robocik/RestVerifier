@@ -16,7 +16,7 @@ public class RestVerifierEngineBase_InvalidUsage_Tests
     [SetUp]
     public void Setup()
     {
-        _builder = RestVerifierEngineBase<TestClient>.Create();
+        _builder = RestVerifierEngine<TestClient>.Create();
         _builder.CreateClient((validator) =>
         {
             _client = new TestClient(validator);

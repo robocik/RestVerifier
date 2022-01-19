@@ -9,10 +9,10 @@ namespace RestVerifier.AspNetCore;
 
 public class WebApplicationVerifierBase<T> : WebApplicationFactory<T> where T:class
 {
-    private readonly CompareRequestValidator _requestValidator;
+    private readonly CompareRequestValidator? _requestValidator;
 
-    protected bool SkipAuthentication { get; set; } = true;
-    public WebApplicationVerifierBase(CompareRequestValidator requestValidator)
+    public bool SkipAuthentication { get; set; } = true;
+    public WebApplicationVerifierBase(CompareRequestValidator? requestValidator)
     {
         _requestValidator = requestValidator;
     }
@@ -23,8 +23,11 @@ public class WebApplicationVerifierBase<T> : WebApplicationFactory<T> where T:cl
 
         builder.ConfigureServices(services =>
         {
-
-            services.AddSingleton(_requestValidator);
+            if (_requestValidator is not null)
+            {
+                services.AddSingleton(_requestValidator);
+            }
+            
             if (SkipAuthentication)
             {
                 services.AddSingleton<IAuthorizationHandler, AllowAnonymous>();    
@@ -32,8 +35,11 @@ public class WebApplicationVerifierBase<T> : WebApplicationFactory<T> where T:cl
             
             services.AddControllers(options =>
             {
-
-                options.Filters.Add(typeof(InputValidationActionFilter));
+                if (_requestValidator is not null)
+                {
+                    options.Filters.Add(typeof(InputValidationActionFilter));
+                }
+                
                 options.Filters.Add(typeof(AllowAnonymousFilter));
             });
         });

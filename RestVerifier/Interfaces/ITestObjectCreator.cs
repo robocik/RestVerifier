@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RestVerifier;
+namespace RestVerifier.Interfaces;
 
 public interface ITestObjectCreator
 {

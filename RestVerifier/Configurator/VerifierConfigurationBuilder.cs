@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading.Tasks;
 using RestVerifier.Interfaces;
 
 namespace RestVerifier.Configurator;
@@ -10,7 +11,7 @@ namespace RestVerifier.Configurator;
 
 public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient>,ISetupStarter<TClient>,IVerifyStarter<TClient>
 {
-    public VerifierConfiguation Configuation { get; } = new ();
+    public VerifierConfiguration Configuration { get; } = new ();
     private CompareRequestValidator? _requestValidator;
     private Type? _comparerType;
     private Type? _objectCreatorType;
@@ -24,15 +25,20 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
         return Activator.CreateInstance<TClient>();
     };
 
-
-    ISetupMethod ISetupStarter<TClient>.Setup<R>(Expression<Func<TClient, R>> method)
+    ISetupMethod ISetupStarter<TClient>.Setup(Expression<Action<TClient>> method)
     {
-        if (method.Body is MethodCallExpression mc)
+        return SetupImplementation(method);
+    }
+
+    private ISetupMethod SetupImplementation(Expression method)
+    {
+        LambdaExpression lambda = (LambdaExpression)method;
+        if (lambda.Body is MethodCallExpression mc)
         {
-            if (!Configuation.Methods.TryGetValue(mc.Method, out var methodConfig))
+            if (!Configuration.Methods.TryGetValue(mc.Method, out var methodConfig))
             {
                 methodConfig = new MethodConfiguration();
-                Configuation.Methods.Add(mc.Method, methodConfig);
+                Configuration.Methods.Add(mc.Method, methodConfig);
             }
 
 
@@ -44,15 +50,14 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
                     paramConfig = new ParameterConfiguration(parameterInfo);
                     methodConfig.Parameters.Add(parameterInfo, paramConfig);
                 }
+
                 var argument = mc.Arguments[index];
                 if (argument is MethodCallExpression mce)
                 {
-
-                    if (mce.Method.DeclaringType == typeof(Behavior) )
+                    if (mce.Method.DeclaringType == typeof(Behavior))
                     {
                         if (mce.Method.Name == nameof(Behavior.Generate))
                         {
-
                         }
                         else if (mce.Method.Name == nameof(Behavior.Transform))
                         {
@@ -63,7 +68,6 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
                     {
                         paramConfig.SetupExpression = mce;
                     }
-
                 }
                 else
                 {
@@ -78,9 +82,14 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
         throw new ArgumentException("This construction is not supported");
     }
 
-    IVerifyTransform IVerifyStarter<TClient>.Verify<R>(Expression<Func<TClient, R>> method)
+    ISetupMethod ISetupStarter<TClient>.Setup<R>(Expression<Func<TClient, R>> method)
     {
-        return VerifyImplementation(method);
+        return SetupImplementation(method);
+    }
+
+    IVerifyFuncTransform IVerifyStarter<TClient>.Verify<R>(Expression<Func<TClient, R>> method)
+    {
+        return (IVerifyFuncTransform)VerifyImplementation(method);
     }
 
     
@@ -95,10 +104,10 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
         LambdaExpression lambda = (LambdaExpression)method;
         if (lambda.Body is MethodCallExpression mc)
         {
-            if (!Configuation.Methods.TryGetValue(mc.Method, out var methodConfig))
+            if (!Configuration.Methods.TryGetValue(mc.Method, out var methodConfig))
             {
                 methodConfig = new MethodConfiguration();
-                Configuation.Methods.Add(mc.Method, methodConfig);
+                Configuration.Methods.Add(mc.Method, methodConfig);
             }
             for (var index = 0; index < mc.Arguments.Count; index++)
             {
@@ -148,7 +157,7 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
     }
     IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.VerifyParameter(Action<ParameterInfo, ParameterValue> method)
     {
-        Configuation.VerifyParameterAction = method;
+        Configuration.VerifyParameterAction = method;
         return this;
     }
 
@@ -187,9 +196,9 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
         return this;
     }
 
-    public RestVerifierEngineBase<TClient> Build()
+    public RestVerifierEngine<TClient> Build()
     {
-        return new RestVerifierEngineBase<TClient>(this);
+        return new RestVerifierEngine<TClient>(this);
     }
 
 
@@ -200,27 +209,33 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
         return this;
     }
 
-    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.ReturnTransform<T>(Func<T, object> func)
+    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.ReturnTransform<T>(Func<T, object?> func)
     {
-        Configuation.ReturnTransforms[typeof(T)] = func;
+        Configuration.ReturnTransforms[typeof(T)] = func;
         return this;
     }
 
-    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.ParameterTransform<T>(Func<T, object> func)
+    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.ParameterTransform<T>(Func<T, object?> func)
     {
-        Configuation.ParameterTransforms[typeof(T)] = func;
+        Configuration.ParameterTransforms[typeof(T)] = func;
         return this;
     }
 
-    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.OnMethodExecuted(Action<ExecutionContext> func)
+    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.OnMethodExecuted(Func<ExecutionContext, Task> func)
     {
-        Configuation.MethodExecuted = func;
+        Configuration.MethodExecuted = func;
+        return this;
+    }
+
+    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.OnMethodExecuting(Func<ExecutionContext, Task> func)
+    {
+        Configuration.MethodExecuting = func;
         return this;
     }
 
     IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.GetMethods(Func<Type, MethodInfo[]> method)
     {
-        Configuation.GetMethodFunc = method;
+        Configuration.GetMethodFunc = method;
         return this;
     }
 
@@ -255,7 +270,7 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
         {
             var objCreator = CreateObjectCreator();
             var objTester = CreateObjectsComparer();
-            _requestValidator = new CompareRequestValidator(Configuation,objTester, objCreator);
+            _requestValidator = new CompareRequestValidator(Configuration,objTester, objCreator);
         }
         
         return _requestValidator;

@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using RestVerifier.Interfaces;
 
 namespace RestVerifier;
 

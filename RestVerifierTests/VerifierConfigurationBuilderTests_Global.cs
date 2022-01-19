@@ -33,15 +33,15 @@ public class VerifierConfigurationBuilderTests_Global
         starter.VerifyParameter(func);
 
 
-        Assert.AreEqual(0,builder.Configuation.Methods.Count);
-        Assert.IsNotNull(builder.Configuation.VerifyParameterAction);
-        Assert.AreEqual(func,builder.Configuation.VerifyParameterAction);
+        Assert.AreEqual(0,builder.Configuration.Methods.Count);
+        Assert.IsNotNull(builder.Configuration.VerifyParameterAction);
+        Assert.AreEqual(func,builder.Configuration.VerifyParameterAction);
     }
 
     [Test]
     public void Parse_get_methods()
     {
-        var oldFunc = builder.Configuation.GetMethodFunc;
+        var oldFunc = builder.Configuration.GetMethodFunc;
         Func<Type, MethodInfo[]> func = (type) =>
         {
             return type.GetMethods();
@@ -49,10 +49,10 @@ public class VerifierConfigurationBuilderTests_Global
         starter.GetMethods(func);
 
 
-        Assert.AreEqual(0, builder.Configuation.Methods.Count);
-        Assert.IsNotNull(builder.Configuation.GetMethodFunc);
-        Assert.AreNotEqual(oldFunc,builder.Configuation.GetMethodFunc);
-        Assert.IsNull(builder.Configuation.VerifyParameterAction);
-        Assert.AreEqual(func, builder.Configuation.GetMethodFunc);
+        Assert.AreEqual(0, builder.Configuration.Methods.Count);
+        Assert.IsNotNull(builder.Configuration.GetMethodFunc);
+        Assert.AreNotEqual(oldFunc,builder.Configuration.GetMethodFunc);
+        Assert.IsNull(builder.Configuration.VerifyParameterAction);
+        Assert.AreEqual(func, builder.Configuration.GetMethodFunc);
     }
 }

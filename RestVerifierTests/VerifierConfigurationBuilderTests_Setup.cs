@@ -21,8 +21,8 @@ public class VerifierConfigurationBuilderTests_Setup
         starter.Setup(c => c.GetMethod1(Behavior.Generate<int>(), "test value"));
         starter.Setup(c => c.GetMethod2(Behavior.Generate<string>(), Behavior.Generate<decimal>(), Behavior.Generate<float>())).Skip();
 
-        Assert.AreEqual(2,builder.Configuation.Methods.Count);
-        var method1 = builder.Configuation.Methods.Single(x => x.Key.Name==nameof(TestClient.GetMethod1));
+        Assert.AreEqual(2,builder.Configuration.Methods.Count);
+        var method1 = builder.Configuration.Methods.Single(x => x.Key.Name==nameof(TestClient.GetMethod1));
         var m1Param1 = method1.Value.Parameters.Values.Where(x => x.Parameter.Name == "param1").Single();
         var m1Param2 = method1.Value.Parameters.Values.Where(x => x.Parameter.Name == "param2").Single();
         Assert.AreEqual(2,method1.Value.Parameters.Count);
@@ -31,7 +31,7 @@ public class VerifierConfigurationBuilderTests_Setup
         Assert.IsNull(m1Param1.SetupExpression );
         Assert.IsTrue(m1Param2.SetupExpression is ConstantExpression);
 
-        var method2 = builder.Configuation.Methods.Single(x => x.Key.Name == nameof(TestClient.GetMethod2));
+        var method2 = builder.Configuration.Methods.Single(x => x.Key.Name == nameof(TestClient.GetMethod2));
         var m2Param1 = method2.Value.Parameters.Values.Where(x => x.Parameter.Name == "param1").Single();
         var m2Param2 = method2.Value.Parameters.Values.Where(x => x.Parameter.Name == "param2").Single();
         var m2Param3 = method2.Value.Parameters.Values.Where(x => x.Parameter.Name == "param3").Single();
@@ -52,10 +52,10 @@ public class VerifierConfigurationBuilderTests_Setup
         starter.Setup(c => c.GetMethod1(Behavior.Generate<int>(), "test value"));
         starter.Setup(c => c.GetMethod2(Behavior.Generate<string>(), Behavior.Generate<decimal>(), Behavior.Generate<float>())).Skip();
         
-        var method1 = builder.Configuation.Methods.Single(x => x.Key.Name == nameof(TestClient.GetMethod1));
+        var method1 = builder.Configuration.Methods.Single(x => x.Key.Name == nameof(TestClient.GetMethod1));
         Assert.IsFalse(method1.Value.Skip);
 
-        var method2 = builder.Configuation.Methods.Single(x => x.Key.Name == nameof(TestClient.GetMethod2));
+        var method2 = builder.Configuration.Methods.Single(x => x.Key.Name == nameof(TestClient.GetMethod2));
         Assert.IsTrue(method2.Value.Skip);
     }
 }

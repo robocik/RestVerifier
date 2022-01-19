@@ -12,11 +12,11 @@ namespace RestVerifier;
 
 
 
-public class RestVerifierEngineBase<TClient>
+public class RestVerifierEngine<TClient>
 {
     private readonly VerifierConfigurationBuilder<TClient> _builder;
 
-    protected internal RestVerifierEngineBase(VerifierConfigurationBuilder<TClient> builder)
+    protected internal RestVerifierEngine(VerifierConfigurationBuilder<TClient> builder)
     {
         _builder = builder;
     }
@@ -34,8 +34,8 @@ public class RestVerifierEngineBase<TClient>
         Validator = _builder.CreateValidator();
         await Invoke(async client =>
         {
-            var clientType = client.GetType();
-            MethodInfo[] methods = _builder.Configuation.GetMethodFunc(clientType);
+            var clientType = client!.GetType();
+            MethodInfo[] methods = _builder.Configuration.GetMethodFunc(clientType);
             for (var index = 0; index < methods.Length; index++)
             {
                 
@@ -47,7 +47,7 @@ public class RestVerifierEngineBase<TClient>
                     {
 
                     }
-                    if (_builder.Configuation.Methods.TryGetValue(methodInfo, out var methodConfig))
+                    if (_builder.Configuration.Methods.TryGetValue(methodInfo, out var methodConfig))
                     {
                         if (methodConfig.Skip)
                         {
@@ -63,6 +63,11 @@ public class RestVerifierEngineBase<TClient>
 
                     IList<object?> values = AddParameters(methodInfo, methodConfig, parameters);
 
+                    await InvokeMethodExecuting(context);
+                    if (context.Abort)
+                    {
+                        return;
+                    }
                     var returnObj = await InvokeMethod(methodInfo, client, values.ToArray());
                     if (methodInfo.Name == "GetPdfFileWithCustomHeader")
                     {
@@ -70,7 +75,7 @@ public class RestVerifierEngineBase<TClient>
                     }
                     Validator.ValidateReturnValue(returnObj);
                     context.Result = ExecutionResult.Success;
-                    InvokeMethodExecuted(context);
+                    await InvokeMethodExecuted(context);
                     if (context.Abort)
                     {
                         return;
@@ -81,7 +86,7 @@ public class RestVerifierEngineBase<TClient>
                 {
                     context.Result = ExecutionResult.Error;
                     context.Exception = e;
-                    InvokeMethodExecuted(context);
+                    await InvokeMethodExecuted(context);
                     if (context.Abort)
                     {
                         throw new VerifierExecutionException(context.Method,e);
@@ -94,14 +99,15 @@ public class RestVerifierEngineBase<TClient>
 
     }
 
-    private void InvokeMethodExecuted(ExecutionContext context)
+    private Task InvokeMethodExecuted(ExecutionContext context)
     {
-        if (_builder.Configuation.MethodExecuted != null)
-        {
-            _builder.Configuation.MethodExecuted(context);
-        }
+        return _builder.Configuration.MethodExecuted(context);
     }
 
+    private Task InvokeMethodExecuting(ExecutionContext context)
+    {
+        return _builder.Configuration.MethodExecuting(context);
+    }
 
     private IList<object?> AddParameters(MethodInfo method, MethodConfiguration? methodConfig, ParameterInfo[] parameters)
     {
@@ -122,7 +128,7 @@ public class RestVerifierEngineBase<TClient>
             paramValue.Value = EvaluateInitialValue(paramConfig,  parameterInfo);
 
             paramValue.ValueToCompare=EvaluateVerifyValue(paramConfig, paramValue);
-            _builder.Configuation.VerifyParameterAction?.Invoke(parameterInfo,paramValue);
+            _builder.Configuration.VerifyParameterAction?.Invoke(parameterInfo,paramValue);
             list.Add(paramValue);
 
 
@@ -131,7 +137,17 @@ public class RestVerifierEngineBase<TClient>
         object?[] arr;
         if (methodConfig?.Transform != null)
         {
-            arr = (object[])methodConfig.Transform.DynamicInvoke(list.Select(x => x.ValueToCompare).ToArray())!;
+            object?[] valuesArray = list.Select(x => x.ValueToCompare).ToArray();
+            var methodParams = methodConfig.Transform.Method.GetParameters();
+            if (methodParams.Length == 1 && methodParams[0].ParameterType == typeof(object?[]))
+            {
+                arr = (object[])methodConfig.Transform.DynamicInvoke(new[] { valuesArray })!;
+            }
+            else
+            {
+                arr = (object[])methodConfig.Transform.DynamicInvoke(valuesArray)!;
+            }
+            
         }
         else
         {
@@ -149,7 +165,7 @@ public class RestVerifierEngineBase<TClient>
         var type=paramConfig?.Parameter.ParameterType??value?.GetType();
         if (type != null)
         {
-            var transform = _builder.Configuation.GetParameterTransform(type);
+            var transform = _builder.Configuration.GetParameterTransform(type);
             if (transform != null)
             {
                 value = (object?)transform.DynamicInvoke(value);
@@ -197,13 +213,11 @@ public class RestVerifierEngineBase<TClient>
             if (paramConfig!.SetupExpression is MethodCallExpression mce)
             {
                 var yu = Expression.Lambda(paramConfig.SetupExpression).Compile().DynamicInvoke();
-                //var yu = ne.Constructor!.Invoke(ne.Arguments.Select(a => ((ConstantExpression)a).Value).ToArray());
                 value = yu;
             }
             else
             {
                 var yu = Expression.Lambda(paramConfig.SetupExpression).Compile().DynamicInvoke();
-                //var yu = ne.Constructor!.Invoke(ne.Arguments.Select(a => ((ConstantExpression)a).Value).ToArray());
                 value = yu;
             }
         }

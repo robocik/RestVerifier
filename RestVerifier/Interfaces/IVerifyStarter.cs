@@ -7,7 +7,7 @@ namespace RestVerifier.Interfaces;
 
 public interface IVerifyStarter<TClient>
 {
-    IVerifyTransform Verify<R>(Expression<Func<TClient, R>> method);
+    IVerifyFuncTransform Verify<R>(Expression<Func<TClient, R>> method);
 
     IVerifyTransform Verify(Expression<Action<TClient>> method);
 
@@ -19,6 +19,8 @@ public interface IVerifyStarter<TClient>
 public interface ISetupStarter<TClient>
 {
     ISetupMethod Setup<R>(Expression<Func<TClient, R>> method);
+
+    ISetupMethod Setup(Expression<Action<TClient>> method);
 }
 
 public interface ISetupMethod
