@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace RestVerifier.Interfaces;
 
-public interface IGlobalSetupStarter<TClient>
+public interface IGlobalSetupStarter<TClient> where TClient: notnull
 {
     IGlobalSetupStarter<TClient> GetMethods(Func<Type, MethodInfo[]> method);
 

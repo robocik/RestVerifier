@@ -12,7 +12,7 @@ namespace RestVerifier;
 
 
 
-public class RestVerifierEngine<TClient>
+public class RestVerifierEngine<TClient> where TClient: notnull
 {
     private readonly VerifierConfigurationBuilder<TClient> _builder;
 
@@ -29,74 +29,85 @@ public class RestVerifierEngine<TClient>
 
     protected CompareRequestValidator Validator { get; private set; } = null!;
 
+    public MethodInfo[] GetMethods()
+    {
+        var client = _builder.CreateClient();
+        var clientType = client!.GetType();
+        MethodInfo[] methods = _builder.Configuration.GetMethodFunc(clientType);
+        return methods;
+    }
     public async Task TestService()
     {
         Validator = _builder.CreateValidator();
-        await Invoke(async client =>
+        var client = _builder.CreateClient();
+        var methods = GetMethods();
+        for (var index = 0; index < methods.Length; index++)
         {
-            var clientType = client!.GetType();
-            MethodInfo[] methods = _builder.Configuration.GetMethodFunc(clientType);
-            for (var index = 0; index < methods.Length; index++)
+
+            var methodInfo = methods[index];
+            var context = new ExecutionContext(methodInfo, methods);
+            try
             {
-                
-                var methodInfo = methods[index];
-                var context = new ExecutionContext(methodInfo);
-                try
+                if (methodInfo.Name == "ImportDefinitionsFromCsv")
                 {
-                    if (methodInfo.Name == "ImportDefinitionsFromCsv")
-                    {
 
-                    }
-                    if (_builder.Configuration.Methods.TryGetValue(methodInfo, out var methodConfig))
-                    {
-                        if (methodConfig.Skip)
-                        {
-                            continue;
-                        }
-                    }
-                    ParameterInfo[] parameters = methodInfo.GetParameters();
-
-                    Console.WriteLine("METHOD: " + methodInfo.Name + " - " + index);
-                    Validator.Reset(methodConfig);
-
-                    Validator.RegisterClientReturnType(methodInfo.ReturnType);
-
-                    IList<object?> values = AddParameters(methodInfo, methodConfig, parameters);
-
-                    await InvokeMethodExecuting(context);
-                    if (context.Abort)
-                    {
-                        return;
-                    }
-                    var returnObj = await InvokeMethod(methodInfo, client, values.ToArray());
-                    if (methodInfo.Name == "GetPdfFileWithCustomHeader")
-                    {
-
-                    }
-                    Validator.ValidateReturnValue(returnObj);
-                    context.Result = ExecutionResult.Success;
-                    await InvokeMethodExecuted(context);
-                    if (context.Abort)
-                    {
-                        return;
-                    }
-                    
                 }
-                catch (Exception e)
+                if (_builder.Configuration.Methods.TryGetValue(methodInfo, out var methodConfig))
                 {
-                    context.Result = ExecutionResult.Error;
-                    context.Exception = e;
-                    await InvokeMethodExecuted(context);
-                    if (context.Abort)
+                    if (methodConfig.Skip)
                     {
-                        throw new VerifierExecutionException(context.Method,e);
+                        continue;
                     }
                 }
+                ParameterInfo[] parameters = methodInfo.GetParameters();
 
+                Console.WriteLine("METHOD: " + methodInfo.Name + " - " + index);
+                Validator.Reset(methodConfig);
+
+                Validator.RegisterClientReturnType(methodInfo.ReturnType);
+
+                IList<object?> values = AddParameters(methodInfo, methodConfig, parameters);
+
+                await InvokeMethodExecuting(context);
+                if (context.Abort)
+                {
+                    return;
+                }
+                var returnObj = await InvokeMethod(methodInfo, client, values.ToArray());
+                if (methodInfo.Name == "GetPdfFileWithCustomHeader")
+                {
+
+                }
+                Validator.ValidateReturnValue(returnObj);
+                context.Result = ExecutionResult.Success;
+                await InvokeMethodExecuted(context);
+                if (context.Abort)
+                {
+                    return;
+                }
 
             }
-        });
+            catch (Exception e)
+            {
+                context.Result = ExecutionResult.Error;
+                if (e is TargetInvocationException target)
+                {
+                    context.Exception = target.InnerException;
+                }
+                else
+                {
+                    context.Exception =e;
+                }
+                
+                await InvokeMethodExecuted(context);
+                if (context.Abort)
+                {
+                    throw new VerifierExecutionException(context.Method, $"Execution of {index+1}/{methods.Length}: {methodInfo.Name} failed", e);
+                }
+            }
 
+
+        }
     }
 
     private Task InvokeMethodExecuted(ExecutionContext context)
@@ -249,13 +260,6 @@ public class RestVerifierEngine<TClient>
 
         return result;
     }
-
-
-    private  Task Invoke(Func<TClient, Task> action)
-    {
-        var client = _builder.CreateClient();
-        return action(client);
-    }
-
+    
     
 }

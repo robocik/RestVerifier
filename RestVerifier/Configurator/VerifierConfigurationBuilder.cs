@@ -9,13 +9,13 @@ using RestVerifier.Interfaces;
 namespace RestVerifier.Configurator;
 
 
-public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient>,ISetupStarter<TClient>,IVerifyStarter<TClient>
+public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient>,ISetupStarter<TClient>,IVerifyStarter<TClient> where TClient: notnull
 {
     public VerifierConfiguration Configuration { get; } = new ();
     private CompareRequestValidator? _requestValidator;
     private Type? _comparerType;
     private Type? _objectCreatorType;
-   
+    private TClient? _client;
 
     private ITestObjectCreator? _objectCreator;
     private IObjectsComparer? _objectComparer;
@@ -276,11 +276,16 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
         return _requestValidator;
     }
 
-
+    
     internal TClient CreateClient()
     {
-        var validator = CreateValidator();
-        return _clientFactory(validator);
+        if (_client == null)
+        {
+            var validator = CreateValidator();
+            _client =_clientFactory(validator);
+        }
+
+        return _client;
     }
     
 }

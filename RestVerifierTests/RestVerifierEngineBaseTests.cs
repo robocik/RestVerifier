@@ -83,12 +83,13 @@ public class RestVerifierEngineBaseTests
     public async Task get_methods()
     {
 
-        _builder.GetMethods(type => type.GetMethods().Where(x => x.Name == "GetMethod2").ToArray());
+        _builder.GetMethods(type => type.GetMethods().Where(x => x.Name == nameof(TestClient.GetMethod2)).ToArray());
         var engine = _builder.Build();
         await engine.TestService();
 
         Assert.IsNotNull(_client.Data[nameof(TestClient.GetMethod2)]);
         Assert.AreEqual(1, _client.Data.Count);
+        Assert.AreEqual(nameof(TestClient.GetMethod2), engine.GetMethods().Single().Name);
     }
 
 
