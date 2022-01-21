@@ -2,8 +2,9 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using RestVerifier.Core.Configurator;
 
-namespace RestVerifier.Core.Configurator;
+namespace RestVerifier.Core;
 
 sealed class ParameterBuilder
 {

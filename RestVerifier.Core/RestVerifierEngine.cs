@@ -32,7 +32,7 @@ public class RestVerifierEngine<TClient> where TClient: notnull
     public MethodInfo[] GetMethods()
     {
         var client = _builder.CreateClient();
-        var clientType = client!.GetType();
+        var clientType = client.GetType();
         MethodInfo[] methods = _builder.Configuration.GetMethodFunc(clientType);
         return methods;
     }
@@ -55,20 +55,14 @@ public class RestVerifierEngine<TClient> where TClient: notnull
                 {
 
                 }
-                if (_builder.Configuration.Methods.TryGetValue(methodInfo, out var methodConfig))
+
+                var methodConfig = GetMethodConfiguration(methodInfo);
+                if (methodConfig==null)
                 {
-                    if (methodConfig.Skip)
-                    {
-                        continue;
-                    }
-                }
-                else if (_builder.Configuration.Mode == EngineMode.Strict)
-                {//in Strict mode we run only methods which are configured in Verify or Setup section
                     continue;
                 }
+                    
 
-                methodConfig ??= new MethodConfiguration(methodInfo);
-                
                 if (methodInfo.IsGenericMethodDefinition)
                 {
                     if (methodConfig.GenericParameters.Length != methodInfo.GetGenericArguments().Length)
@@ -77,13 +71,14 @@ public class RestVerifierEngine<TClient> where TClient: notnull
                     }
                     methodInfo = methodInfo.MakeGenericMethod(methodConfig.GenericParameters);
                 }
-                ParameterInfo[] parameters = methodInfo.GetParameters();
+                
 
                 Console.WriteLine("METHOD: " + methodInfo.Name + " - " + index);
                 Validator.Reset(methodConfig);
 
                 returnValueBuilder.RegisterClientReturnType(methodConfig,methodInfo.ReturnType);
 
+                ParameterInfo[] parameters = methodInfo.GetParameters();
                 IList<object?> values = paramBuilder.AddParameters(methodConfig, parameters);
                 
                 await InvokeMethodExecuting(context);
@@ -107,25 +102,46 @@ public class RestVerifierEngine<TClient> where TClient: notnull
             }
             catch (Exception e)
             {
-                context.Result = ExecutionResult.Error;
-                if (e is TargetInvocationException target)
-                {
-                    context.Exception = target.InnerException;
-                }
-                else
-                {
-                    context.Exception = e;
-                }
-
-                await InvokeMethodExecuted(context);
-                if (context.Abort)
-                {
-                    throw new VerifierExecutionException(context.Method, $"Execution of {index + 1}/{methods.Length}: {methodInfo.Name} failed", context.Exception!);
-                }
+                await HandleException(context, e, index, methods, methodInfo);
             }
 
 
         }
+    }
+
+    private async Task HandleException(ExecutionContext context, Exception exception, int index, MethodInfo[] methods, MethodInfo methodInfo)
+    {
+        context.Result = ExecutionResult.Error;
+        context.Exception = exception;
+        if (exception is TargetInvocationException target)
+        {
+            context.Exception = target.InnerException;
+        }
+
+        await InvokeMethodExecuted(context);
+        if (context.Abort)
+        {
+            throw new VerifierExecutionException(context.Method, $"Execution of {index + 1}/{methods.Length}: {methodInfo.Name} failed", context.Exception!);
+        }
+    }
+
+    private MethodConfiguration? GetMethodConfiguration(MethodInfo methodInfo)
+    {
+        if (_builder.Configuration.Methods.TryGetValue(methodInfo, out var methodConfig))
+        {
+            if (methodConfig.Skip)
+            {
+                return null;
+            }
+        }
+        else if (_builder.Configuration.Mode == EngineMode.Strict)
+        {
+            //in Strict mode we run only methods which are configured in Verify or Setup section
+            return null;
+        }
+
+        methodConfig ??= new MethodConfiguration(methodInfo);
+        return methodConfig;
     }
 
     private Task InvokeMethodExecuted(ExecutionContext context)
