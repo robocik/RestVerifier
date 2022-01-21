@@ -2,9 +2,9 @@
 using System.Linq;
 using AutoFixture;
 using AutoFixture.Kernel;
-using RestVerifier.Interfaces;
+using RestVerifier.Core.Interfaces;
 
-namespace RestVerifier;
+namespace RestVerifier.AutoFixture;
 
 public class AutoFixtureObjectCreator:ITestObjectCreator
 {

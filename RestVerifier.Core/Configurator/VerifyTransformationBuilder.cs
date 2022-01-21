@@ -1,10 +1,10 @@
 ﻿using System;
-using RestVerifier.Interfaces;
+using RestVerifier.Core.Interfaces;
 
-namespace RestVerifier.Configurator;
+namespace RestVerifier.Core.Configurator;
 
 
-public class VerifyTransformationBuilder : IVerifyFuncTransform
+sealed class VerifyTransformationBuilder : IVerifyFuncTransform
 {
     private readonly MethodConfiguration _methodConfig;
 

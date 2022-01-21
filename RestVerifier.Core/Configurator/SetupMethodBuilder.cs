@@ -1,8 +1,8 @@
-﻿using RestVerifier.Interfaces;
+﻿using RestVerifier.Core.Interfaces;
 
-namespace RestVerifier.Configurator;
+namespace RestVerifier.Core.Configurator;
 
-public class SetupMethodBuilder : ISetupMethod
+sealed class SetupMethodBuilder : ISetupMethod
 {
     private readonly MethodConfiguration _methodConfig;
 

@@ -4,12 +4,11 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace RestVerifier.Configurator;
+namespace RestVerifier.Core.Configurator;
 
-public class VerifierConfiguration
+public sealed class VerifierConfiguration
 {
-
-
+    public EngineMode Mode { get; internal set; }
     public Dictionary<Type, Delegate> ReturnTransforms { get; } = new();
 
     public Dictionary<MethodInfo, MethodConfiguration> Methods { get; } = new();

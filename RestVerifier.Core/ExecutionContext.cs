@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace RestVerifier;
+namespace RestVerifier.Core;
 
 public enum ExecutionResult
 {

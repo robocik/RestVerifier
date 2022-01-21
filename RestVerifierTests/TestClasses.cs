@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using RestVerifier;
+using RestVerifier.Core;
 
-namespace RestVerifierTests;
+namespace RestVerifier.Tests;
 
 public interface ITestParam
 {
@@ -68,5 +68,16 @@ class TestClient
             { nameof(param1), param1 }
         };
         Data.Add(nameof(GetMethod4), dict);
+    }
+
+    public T2 GetMethod5<T1,T2>(TestParam param1,T1 param2)
+    {
+        var dict = new Dictionary<string, object>
+        {
+            { nameof(param1), param1 },
+            { nameof(param2), param2 }
+        };
+        Data.Add(nameof(GetMethod5), dict);
+        return default(T2);
     }
 }

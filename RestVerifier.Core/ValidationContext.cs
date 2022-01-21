@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace RestVerifier;
+namespace RestVerifier.Core;
 
 
 public class ValidationContext : IRemoteServiceContext

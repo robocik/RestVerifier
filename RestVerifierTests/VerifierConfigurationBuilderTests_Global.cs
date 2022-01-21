@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Reflection;
 using NUnit.Framework;
-using RestVerifier;
-using RestVerifier.Configurator;
-using RestVerifier.Interfaces;
+using RestVerifier.Core.Configurator;
+using RestVerifier.Core.Interfaces;
 
-namespace RestVerifierTests;
+namespace RestVerifier.Tests;
 
 [TestFixture]
 public class VerifierConfigurationBuilderTests_Global
@@ -20,24 +19,7 @@ public class VerifierConfigurationBuilderTests_Global
         starter = builder;
     }
 
-    [Test]
-    public void Parse_verify_parameter()
-    {
-        Action<ParameterInfo, ParameterValue> func = (paramInfo, param) =>
-        {
-            if (param.Value is decimal)
-            {
-                param.Ignore = true;
-            }
-        };
-        starter.VerifyParameter(func);
-
-
-        Assert.AreEqual(0,builder.Configuration.Methods.Count);
-        Assert.IsNotNull(builder.Configuration.VerifyParameterAction);
-        Assert.AreEqual(func,builder.Configuration.VerifyParameterAction);
-    }
-
+   
     [Test]
     public void Parse_get_methods()
     {

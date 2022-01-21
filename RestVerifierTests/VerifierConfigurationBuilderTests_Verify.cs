@@ -1,10 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using NUnit.Framework;
-using RestVerifier.Configurator;
-using RestVerifier.Interfaces;
+using RestVerifier.Core.Configurator;
+using RestVerifier.Core.Interfaces;
 
-namespace RestVerifierTests;
+namespace RestVerifier.Tests;
 
 [TestFixture]
 public class VerifierConfigurationBuilderTests_Verify
@@ -45,6 +47,25 @@ public class VerifierConfigurationBuilderTests_Verify
         Assert.IsNull(m2Param1.VerifyExpression);
         Assert.IsNull(m2Param2.VerifyExpression);
         Assert.IsNull(m2Param3.VerifyExpression);
+    }
+
+
+    [Test]
+    public void Parse_verify_parameter()
+    {
+        Action<ParameterInfo, ParameterValue> func = (paramInfo, param) =>
+        {
+            if (param.Value is decimal)
+            {
+                param.Ignore = true;
+            }
+        };
+        starter.VerifyParameter(func);
+
+
+        Assert.AreEqual(0, builder.Configuration.Methods.Count);
+        Assert.IsNotNull(builder.Configuration.VerifyParameterAction);
+        Assert.AreEqual(func, builder.Configuration.VerifyParameterAction);
     }
 
     [Test]

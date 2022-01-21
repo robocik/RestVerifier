@@ -4,14 +4,18 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
-using RestVerifier.Interfaces;
+using RestVerifier.Core.Configurator;
+using RestVerifier.Core.Interfaces;
 
-namespace RestVerifier.Configurator;
+namespace RestVerifier.Core.Configurator;
 
 
-public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient>,ISetupStarter<TClient>,IVerifyStarter<TClient> where TClient: notnull
+public sealed class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient>,ISetupStarter<TClient>,IVerifyStarter<TClient> where TClient: notnull
 {
     public VerifierConfiguration Configuration { get; } = new ();
+
+    
+
     private CompareRequestValidator? _requestValidator;
     private Type? _comparerType;
     private Type? _objectCreatorType;
@@ -19,7 +23,7 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
 
     private ITestObjectCreator? _objectCreator;
     private IObjectsComparer? _objectComparer;
-    
+
     private Func<CompareRequestValidator,TClient> _clientFactory= (crv) =>
     {
         return Activator.CreateInstance<TClient>();
@@ -30,17 +34,28 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
         return SetupImplementation(method);
     }
 
+
+
     private ISetupMethod SetupImplementation(Expression method)
     {
         LambdaExpression lambda = (LambdaExpression)method;
         if (lambda.Body is MethodCallExpression mc)
         {
+            var methodInfo = mc.Method;
+            if (mc.Method.IsGenericMethod)
+            {
+                methodInfo=mc.Method.GetGenericMethodDefinition();
+            }
             if (!Configuration.Methods.TryGetValue(mc.Method, out var methodConfig))
             {
                 methodConfig = new MethodConfiguration();
-                Configuration.Methods.Add(mc.Method, methodConfig);
+                Configuration.Methods.Add(methodInfo, methodConfig);
             }
 
+            if (mc.Method.IsGenericMethod)
+            {
+                methodConfig.GenericParameters = mc.Method.GetGenericArguments();
+            }
 
             for (var index = 0; index < mc.Arguments.Count; index++)
             {
@@ -104,14 +119,24 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
         LambdaExpression lambda = (LambdaExpression)method;
         if (lambda.Body is MethodCallExpression mc)
         {
+            var methodInfo = mc.Method;
+            if (mc.Method.IsGenericMethod)
+            {
+                methodInfo=mc.Method.GetGenericMethodDefinition();
+            }
             if (!Configuration.Methods.TryGetValue(mc.Method, out var methodConfig))
             {
                 methodConfig = new MethodConfiguration();
-                Configuration.Methods.Add(mc.Method, methodConfig);
+                Configuration.Methods.Add(methodInfo, methodConfig);
+            }
+
+            if (mc.Method.IsGenericMethod)
+            {
+                methodConfig.GenericParameters = mc.Method.GetGenericArguments();
             }
             for (var index = 0; index < mc.Arguments.Count; index++)
             {
-                var parameterInfo = mc.Method.GetParameters()[index];
+                var parameterInfo = methodInfo.GetParameters()[index];
                 if (!methodConfig.Parameters.TryGetValue(parameterInfo, out var paramConfig))
                 {
                     paramConfig = new ParameterConfiguration(parameterInfo);
@@ -155,9 +180,16 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
 
         throw new ArgumentException("This construction is not supported");
     }
-    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.VerifyParameter(Action<ParameterInfo, ParameterValue> method)
+
+
+    void IVerifyStarter<TClient>.VerifyParameter(Action<ParameterInfo, ParameterValue> method)
     {
         Configuration.VerifyParameterAction = method;
+    }
+
+    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.SetMode(EngineMode mode)
+    {
+        Configuration.Mode = mode;
         return this;
     }
 
@@ -209,16 +241,14 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
         return this;
     }
 
-    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.ReturnTransform<T>(Func<T, object?> func)
+    void IVerifyStarter<TClient>.ReturnTransform<T>(Func<T, object?> func)
     {
         Configuration.ReturnTransforms[typeof(T)] = func;
-        return this;
     }
 
-    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.ParameterTransform<T>(Func<T, object?> func)
+    void IVerifyStarter<TClient>.ParameterTransform<T>(Func<T, object?> func)
     {
         Configuration.ParameterTransforms[typeof(T)] = func;
-        return this;
     }
 
     IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.OnMethodExecuted(Func<ExecutionContext, Task> func)
@@ -249,7 +279,9 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
         {
             return (ITestObjectCreator)Activator.CreateInstance(_objectCreatorType);
         }
-        return new AutoFixtureObjectCreator();
+
+        throw new ArgumentNullException(
+            "You must set ObjectCreator in your configuration. Please use UseObjectCreator method for this");
     }
 
     private IObjectsComparer CreateObjectsComparer()
@@ -262,7 +294,8 @@ public class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient
         {
             return (IObjectsComparer)Activator.CreateInstance(_comparerType);
         }
-        return new FluentAssertionComparer();
+        throw new ArgumentNullException(
+            "You must set ObjectsComprarer in your configuration. Please use UseComparer method for this");
     }
     internal CompareRequestValidator CreateValidator()
     {

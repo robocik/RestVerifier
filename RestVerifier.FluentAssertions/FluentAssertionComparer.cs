@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
-using RestVerifier.Interfaces;
+using RestVerifier.Core.Interfaces;
 
-namespace RestVerifier;
+namespace RestVerifier.FluentAssertions;
 
 public class FluentAssertionComparer:IObjectsComparer
 {

@@ -1,22 +1,25 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Reflection;
-using RestVerifier.Configurator;
 
-namespace RestVerifier.Interfaces;
+namespace RestVerifier.Core.Interfaces;
 
-public interface IVerifyStarter<TClient>
+public interface IVerifyStarter<TClient> where TClient:notnull
 {
     IVerifyFuncTransform Verify<R>(Expression<Func<TClient, R>> method);
 
     IVerifyTransform Verify(Expression<Action<TClient>> method);
 
-    
+    void ReturnTransform<T>(Func<T, object?> func);
+
+    void ParameterTransform<T>(Func<T, object?> func);
+
+    void VerifyParameter(Action<ParameterInfo, ParameterValue> method);
 }
 
 
 
-public interface ISetupStarter<TClient>
+public interface ISetupStarter<TClient> where TClient : notnull
 {
     ISetupMethod Setup<R>(Expression<Func<TClient, R>> method);
 

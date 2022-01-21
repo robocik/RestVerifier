@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using RestVerifier.Core.Configurator;
 
-namespace RestVerifier.Interfaces;
+namespace RestVerifier.Core.Interfaces;
 
 public interface IGlobalSetupStarter<TClient> where TClient: notnull
 {
     IGlobalSetupStarter<TClient> GetMethods(Func<Type, MethodInfo[]> method);
 
-    IGlobalSetupStarter<TClient> VerifyParameter(Action<ParameterInfo, ParameterValue> method);
+    IGlobalSetupStarter<TClient> SetMode(EngineMode mode);
 
     IGlobalSetupStarter<TClient> UseComparer<T>() where T : IObjectsComparer;
 
@@ -25,9 +26,7 @@ public interface IGlobalSetupStarter<TClient> where TClient: notnull
     RestVerifierEngine<TClient> Build();
 
     IGlobalSetupStarter<TClient> CreateClient(Func<CompareRequestValidator, TClient> factory);
-    IGlobalSetupStarter<TClient> ReturnTransform<T>(Func<T, object?> func);
-
-    IGlobalSetupStarter<TClient> ParameterTransform<T>(Func<T, object?> func);
+    
 
     IGlobalSetupStarter<TClient> OnMethodExecuted(Func<ExecutionContext,Task> func);
 

@@ -6,10 +6,9 @@
 	  <Nullable>enable</Nullable>
   </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="AutoFixture" Version="4.17.0" />
-		<PackageReference Include="FluentAssertions" Version="6.3.0" />
-		<PackageReference Include="Moq" Version="4.16.1" />
-		<PackageReference Include="coverlet.collector" Version="3.1.0" />
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RestVerifier.AutoFixture\RestVerifier.AutoFixture.csproj" />
+    <ProjectReference Include="..\RestVerifier.Core\RestVerifier.Core.csproj" />
+    <ProjectReference Include="..\RestVerifier.FluentAssertions\RestVerifier.FluentAssertions.csproj" />
+  </ItemGroup>
 </Project>

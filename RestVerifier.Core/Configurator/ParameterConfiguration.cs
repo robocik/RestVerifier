@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
 
-namespace RestVerifier.Configurator;
+namespace RestVerifier.Core.Configurator;
 
-public enum VerifyBehavior
-{
-    Default,
-    GenerateValue,
-    Ignore,
-    Transform
-}
 public class ParameterConfiguration
 {
     public ParameterConfiguration(ParameterInfo parameter)
@@ -27,11 +18,4 @@ public class ParameterConfiguration
 
     public bool Ignore => VerifyBehavior == VerifyBehavior.Ignore;
 
-}
-public class MethodConfiguration
-{
-    public bool Skip { get; set; }
-    public Dictionary<ParameterInfo, ParameterConfiguration> Parameters { get; } = new();
-    public Delegate? Transform { get; set; }
-    public Delegate? ReturnTransform { get; set; }
 }

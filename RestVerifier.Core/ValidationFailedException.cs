@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace RestVerifier;
+namespace RestVerifier.Core;
 
 public class ValidationFailedException:Exception
 {

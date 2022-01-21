@@ -5,10 +5,10 @@ using System.Linq.Expressions;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
-using RestVerifier.Configurator;
-using RestVerifier.Interfaces;
+using RestVerifier.Core.Configurator;
+using RestVerifier.Core.Interfaces;
 
-namespace RestVerifier;
+namespace RestVerifier.Core;
 
 
 
@@ -59,6 +59,19 @@ public class RestVerifierEngine<TClient> where TClient: notnull
                         continue;
                     }
                 }
+                else if (_builder.Configuration.Mode == EngineMode.Strict)
+                {//in Strict mode we run only methods which are configured in Verify or Setup section
+                    continue;
+                }
+
+                if (methodInfo.IsGenericMethodDefinition)
+                {
+                    if (methodConfig?.GenericParameters.Length != methodInfo.GetGenericArguments().Length)
+                    {
+                        throw new ArgumentNullException($"Method {methodInfo.Name} is generic. You need to configure it by using Verify or Setup method");
+                    }
+                    methodInfo = methodInfo.MakeGenericMethod(methodConfig.GenericParameters);
+                }
                 ParameterInfo[] parameters = methodInfo.GetParameters();
 
                 Console.WriteLine("METHOD: " + methodInfo.Name + " - " + index);
@@ -102,7 +115,7 @@ public class RestVerifierEngine<TClient> where TClient: notnull
                 await InvokeMethodExecuted(context);
                 if (context.Abort)
                 {
-                    throw new VerifierExecutionException(context.Method, $"Execution of {index+1}/{methods.Length}: {methodInfo.Name} failed", e);
+                    throw new VerifierExecutionException(context.Method, $"Execution of {index+1}/{methods.Length}: {methodInfo.Name} failed", context.Exception!);
                 }
             }
 
@@ -244,6 +257,11 @@ public class RestVerifierEngine<TClient> where TClient: notnull
 
     protected virtual async Task<object?> InvokeMethod(MethodInfo methodInfo, object client, object?[] values)
     {
+        // if (methodInfo.IsGenericMethod)
+        // {
+        //     var types=methodInfo.GetGenericArguments();
+        //     methodInfo=methodInfo.MakeGenericMethod(types);
+        // }
         var result = methodInfo.Invoke(client, values);
         if (result is Task task)
         {

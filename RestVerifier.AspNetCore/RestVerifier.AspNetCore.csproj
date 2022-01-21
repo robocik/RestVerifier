@@ -8,13 +8,13 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="6.0.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.1.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.1.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.1" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\RestVerifier\RestVerifier.csproj" />
+	  <ProjectReference Include="..\RestVerifier.Core\RestVerifier.Core.csproj" />
 	</ItemGroup>
 </Project>

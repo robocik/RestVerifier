@@ -1,16 +1,13 @@
-﻿using AutoFixture;
-using AutoFixture.Kernel;
-using FluentAssertions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using RestVerifier.Configurator;
-using RestVerifier.Interfaces;
+using RestVerifier.Core.Configurator;
+using RestVerifier.Core.Interfaces;
 
-namespace RestVerifier;
+namespace RestVerifier.Core;
 
 
 

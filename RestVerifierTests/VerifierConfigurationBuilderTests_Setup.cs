@@ -3,10 +3,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using NUnit.Framework;
 using RestVerifier;
-using RestVerifier.Configurator;
-using RestVerifier.Interfaces;
+using RestVerifier.Core.Configurator;
+using RestVerifier.Core.Interfaces;
 
-namespace RestVerifierTests;
+namespace RestVerifier.Tests;
 
 
 
