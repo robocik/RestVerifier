@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace RestVerifier
+﻿namespace RestVerifier.Core
 {
     public record ParameterValue(string Name)
     {

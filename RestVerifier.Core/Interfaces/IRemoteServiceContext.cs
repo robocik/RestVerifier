@@ -1,4 +1,4 @@
-﻿namespace RestVerifier
+﻿namespace RestVerifier.Core
 {
     public interface IRemoteServiceContext
     {

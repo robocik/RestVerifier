@@ -19,6 +19,7 @@ sealed class ParameterBuilder
 
     internal IList<object?> AddParameters(MethodConfiguration methodConfig, ParameterInfo[] parameters)
     {
+        
         var list = new List<ParameterValue>();
         foreach (var parameterInfo in parameters)
         {
@@ -76,7 +77,7 @@ sealed class ParameterBuilder
 
         if (paramConfig?.VerifyExpression != null)
         {
-            if (paramConfig!.VerifyExpression is MethodCallExpression mce)
+            if (paramConfig.VerifyExpression is MethodCallExpression mce)
             {
                 if (mce.Method.DeclaringType == typeof(Behavior))
                 {

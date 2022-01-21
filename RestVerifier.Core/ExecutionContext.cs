@@ -12,9 +12,8 @@ public enum ExecutionResult
 public class ExecutionContext
 {
 
-    public ExecutionContext(MethodInfo method,MethodInfo[] allMethods)
+    public ExecutionContext(MethodInfo method)
     {
-        AllMethods = allMethods;
         Method = method;
     }
 
@@ -25,6 +24,4 @@ public class ExecutionContext
     public MethodInfo Method { get;  }
 
     public bool Abort { get; set; }
-
-    public MethodInfo[] AllMethods { get; }
 }

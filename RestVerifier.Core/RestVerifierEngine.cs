@@ -43,12 +43,11 @@ public class RestVerifierEngine<TClient> where TClient: notnull
         var methods = GetMethods();
 
         var paramBuilder = new ParameterBuilder(_builder.Configuration, Validator);
-        var returnValueBuilder = new ReturnValueBuilder(_builder.Configuration, Validator);
         for (var index = 0; index < methods.Length; index++)
         {
 
             var methodInfo = methods[index];
-            ExecutionContext context = new ExecutionContext(methodInfo, methods);
+            ExecutionContext context = new ExecutionContext(methodInfo);
             try
             {
                 if (methodInfo.Name == "ImportDefinitionsFromCsv")
@@ -76,9 +75,8 @@ public class RestVerifierEngine<TClient> where TClient: notnull
                 Console.WriteLine("METHOD: " + methodInfo.Name + " - " + index);
                 Validator.Reset(methodConfig);
 
-                returnValueBuilder.RegisterClientReturnType(methodConfig,methodInfo.ReturnType);
-
-                ParameterInfo[] parameters = methodInfo.GetParameters();
+                methodConfig.ReturnType = methodInfo.ReturnType.GetTypeWithoutTask();
+                var parameters = methodInfo.GetParameters();
                 IList<object?> values = paramBuilder.AddParameters(methodConfig, parameters);
                 
                 await InvokeMethodExecuting(context);

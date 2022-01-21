@@ -751,7 +751,6 @@ public class RestVerifierEngineBaseTests
     [Test]
     public async Task generic_method_configured_in_setup()
     {
-        var list = new List<MethodInfo>();
         _builder.ConfigureSetup(c =>
         {
             c.Setup(b => b.GetMethod5<int, TestParam>(null, 3));

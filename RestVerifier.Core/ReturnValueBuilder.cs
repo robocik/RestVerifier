@@ -23,8 +23,13 @@ public sealed class ReturnValueBuilder
             return null;
         }
 
-        RegisterClientReturnType(methodConfig,methodConfig.ReturnType!);
+        methodConfig.ReturnType = methodConfig.ReturnType!.GetTypeWithoutTask();
 
+        return GenerateReturnValue(methodConfig);
+    }
+
+    private object? GenerateReturnValue(MethodConfiguration methodConfig)
+    {
         var returnObject = _requestValidator.Creator.Create(methodConfig.ReturnType!);
 
 
@@ -42,15 +47,7 @@ public sealed class ReturnValueBuilder
                 returnObject = (object?)transform.DynamicInvoke(returnObject);
             }
         }
-        return returnObject;
-    }
 
-    public void RegisterClientReturnType(MethodConfiguration methodConfig,Type type)
-    {
-        methodConfig.ReturnType = type;
-        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Task<>))
-        {
-            methodConfig.ReturnType = type.GetGenericArguments().First();
-        }
+        return returnObject;
     }
 }

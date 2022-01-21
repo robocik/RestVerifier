@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using NUnit.Framework;
+using RestVerifier.Core;
 using RestVerifier.Core.Configurator;
 using RestVerifier.Core.Interfaces;
 

@@ -27,6 +27,7 @@ public class CompareRequestValidator
     }
 
     public IRemoteServiceContext Context => _context;
+    public IObjectsComparer Comparer => _comparer;
 
     public object? AddReturnType(Type? type)
     {
@@ -41,7 +42,7 @@ public class CompareRequestValidator
     public bool ValidateParams(IDictionary<string, object?> contextActionArguments)
     {
         var values = _context.ValuesToCompare.ToList();
-        _comparer.Compare(contextActionArguments.Count, values.Count);
+        Comparer.Compare(contextActionArguments.Count, values.Count);
 
         if (contextActionArguments.Values.Count > 0)
         {
@@ -50,7 +51,7 @@ public class CompareRequestValidator
             {
                 var originalValue = values[index];
                 var value = newValue[index];
-                _comparer.Compare(value,originalValue);
+                Comparer.Compare(value,originalValue);
             }
         }
         
@@ -59,7 +60,7 @@ public class CompareRequestValidator
 
     public void ValidateReturnValue(object? returnValue)
     {
-        _comparer.Compare(returnValue, _context.ReturnObject);
+        Comparer.Compare(returnValue, _context.ReturnObject);
     }
 
     public void Reset(MethodConfiguration methodConfiguration)
