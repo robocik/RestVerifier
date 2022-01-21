@@ -312,7 +312,7 @@ public class RestVerifierEngineBaseTests
                     invokedType = true;
                     return h;
                 });
-                x.Verify(u => u.GetMethod3(Behavior.Verify<TestParam>())).Returns<string, string>(k =>
+                x.Verify(u => u.GetMethod3(Behavior.Verify<TestParam>())).Returns<string>(k =>
                 {
                     invokedMethod = true;
                     return k;
@@ -478,7 +478,7 @@ public class RestVerifierEngineBaseTests
         });
         _builder.ConfigureVerify(x =>
         {
-            x.VerifyParameter((x, v) =>
+            x.Transform((x, v) =>
             {
                 if (x.ParameterType == typeof(TestParam))
                 {
@@ -503,7 +503,7 @@ public class RestVerifierEngineBaseTests
         bool invoked = false;
         _builder.ConfigureVerify(x =>
             {
-                x.ParameterTransform<TestParam>(h =>
+                x.Transform<TestParam>(h =>
                 {
                     invoked = true;
 
@@ -542,7 +542,7 @@ public class RestVerifierEngineBaseTests
             });
         _builder.ConfigureVerify(c =>
         {
-            c.ParameterTransform<TestParam>(h =>
+            c.Transform<TestParam>(h =>
             {
                 invoked = true;
 
@@ -630,7 +630,7 @@ public class RestVerifierEngineBaseTests
         });
         _builder.ConfigureVerify(c =>
         {
-            c.Verify(k => k.GetMethod2(Behavior.Transform<string>(h => "wrong"),Behavior.Verify<decimal>(), Behavior.Verify<float>())).Returns<TestParam,string>(j=>j.Prop1);
+            c.Verify(k => k.GetMethod2(Behavior.Transform<string>(h => "wrong"),Behavior.Verify<decimal>(), Behavior.Verify<float>())).Returns<TestParam>(j=>j.Prop1);
         });
         _builder.OnMethodExecuted(c =>
         {
@@ -653,7 +653,7 @@ public class RestVerifierEngineBaseTests
     {
         _builder.ConfigureVerify(c =>
         {
-            c.Verify(k => k.GetMethod2(Behavior.Transform<string>(h => "wrong"), Behavior.Verify<decimal>(), Behavior.Verify<float>())).Returns<TestParam, string>(j => j.Prop1);
+            c.Verify(k => k.GetMethod2(Behavior.Transform<string>(h => "wrong"), Behavior.Verify<decimal>(), Behavior.Verify<float>())).Returns<TestParam>(j => j.Prop1);
         });
         var engine = _builder.Build();
         var ex=Assert.ThrowsAsync<VerifierExecutionException>(async () => await engine.TestService());

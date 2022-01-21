@@ -17,7 +17,6 @@ public class CompareRequestValidator
     private IObjectsComparer _comparer;
     public ITestObjectCreator Creator { get; }
     private ValidationContext _context = new ();
-    private Type? _returnType;
     private MethodConfiguration? _currentMethod;
     
     public CompareRequestValidator(VerifierConfiguration configuration, IObjectsComparer comparer, ITestObjectCreator creator)
@@ -31,35 +30,12 @@ public class CompareRequestValidator
 
     public object? AddReturnType(Type? type)
     {
-        _returnType ??= type;
-        if (_returnType==null || _returnType == typeof(void) || _returnType == typeof(Task))
+        if (_currentMethod == null)
         {
-            return null;
+            throw new ArgumentNullException("_currentMethod");
         }
-
-        if (_returnType.IsGenericType && _returnType.GetGenericTypeDefinition() == typeof(Task<>))
-        {
-            _returnType = _returnType.GetGenericArguments().First();
-        }
-        
-        var returnObject = Creator.Create(_returnType);
-        
-        
-        Context.AddReturnValue(returnObject);
-        
-        if (_currentMethod?.ReturnTransform != null)
-        {
-            returnObject = (object?)_currentMethod.ReturnTransform.DynamicInvoke(returnObject);
-        }
-        else
-        {
-            var transform = _configuration.GetReturnTransform(_returnType);
-            if (transform!=null)
-            {
-                returnObject = (object?)transform.DynamicInvoke(returnObject);
-            }
-        }
-        return returnObject;
+        var builder = new ReturnValueBuilder(_configuration, this);
+        return builder.AddReturnType(_currentMethod, type);
     }
 
     public bool ValidateParams(IDictionary<string, object?> contextActionArguments)
@@ -91,13 +67,5 @@ public class CompareRequestValidator
         _currentMethod = methodConfiguration;
         _context.Reset();
     }
-
-    public void RegisterClientReturnType(Type type)
-    {
-        _returnType = type;
-        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Task<>))
-        {
-            _returnType = type.GetGenericArguments().First();
-        }
-    }
+    
 }

@@ -60,7 +60,7 @@ public class VerifierConfigurationBuilderTests_Verify
                 param.Ignore = true;
             }
         };
-        starter.VerifyParameter(func);
+        starter.Transform(func);
 
 
         Assert.AreEqual(0, builder.Configuration.Methods.Count);

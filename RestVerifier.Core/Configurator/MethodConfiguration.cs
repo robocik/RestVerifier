@@ -13,12 +13,19 @@ public enum VerifyBehavior
     Transform
 }
 
-public class MethodConfiguration
+public sealed class MethodConfiguration
 {
+    public MethodConfiguration(MethodInfo methodInfo)
+    {
+        MethodInfo = methodInfo;
+    }
+
+    public MethodInfo MethodInfo { get; }
     public bool Skip { get; set; }
     public Dictionary<ParameterInfo, ParameterConfiguration> Parameters { get; } = new();
     public Delegate? Transform { get; set; }
     public Delegate? ReturnTransform { get; set; }
 
     public Type[] GenericParameters { get; internal set; } = Array.Empty<Type>();
+    public Type? ReturnType { get; internal set; }
 }

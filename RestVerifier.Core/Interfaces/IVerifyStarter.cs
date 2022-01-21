@@ -12,21 +12,9 @@ public interface IVerifyStarter<TClient> where TClient:notnull
 
     void ReturnTransform<T>(Func<T, object?> func);
 
-    void ParameterTransform<T>(Func<T, object?> func);
+    void Transform<T>(Func<T, object?> func);
 
-    void VerifyParameter(Action<ParameterInfo, ParameterValue> method);
+    void Transform(Action<ParameterInfo, ParameterValue> method);
 }
 
 
-
-public interface ISetupStarter<TClient> where TClient : notnull
-{
-    ISetupMethod Setup<R>(Expression<Func<TClient, R>> method);
-
-    ISetupMethod Setup(Expression<Action<TClient>> method);
-}
-
-public interface ISetupMethod
-{
-    void Skip();
-}

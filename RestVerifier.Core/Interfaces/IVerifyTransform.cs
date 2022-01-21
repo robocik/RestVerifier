@@ -20,5 +20,5 @@ public interface IVerifyTransform
 
 public interface IVerifyFuncTransform: IVerifyTransform
 {
-    void Returns<P, R>(Func<P, R> transform);
+    void Returns<P>(Func<P,object?> transform);
 }

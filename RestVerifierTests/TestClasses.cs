@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using RestVerifier.Core;
+using RestVerifier.Core.Interfaces;
 
 namespace RestVerifier.Tests;
 

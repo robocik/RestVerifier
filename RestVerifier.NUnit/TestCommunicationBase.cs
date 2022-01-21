@@ -14,7 +14,7 @@ namespace RestVerifier.NUnit;
 [TestFixture]
 public abstract class TestCommunicationBase<TClient> where TClient:notnull
 {
-    protected IGlobalSetupStarter<TClient> _builder;
+    protected IGlobalSetupStarter<TClient> _builder=null!;
 
     [OneTimeSetUp]
     public virtual void CreateFixture()

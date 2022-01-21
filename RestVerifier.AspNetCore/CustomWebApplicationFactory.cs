@@ -11,19 +11,13 @@ public class CustomWebApplicationFactory<TStartup>
 
     protected override IHost CreateHost(IHostBuilder builder)
     {
-        builder.ConfigureServices(services =>
-        {
-        }).UseContentRoot(".");
+        builder.UseContentRoot(".");
         return base.CreateHost(builder);
     }
 
     protected override IHostBuilder CreateHostBuilder()
     {
-        return Host.CreateDefaultBuilder(new string[] { "renti" })
-            .ConfigureServices(services =>
-            {
-
-            }).ConfigureWebHostDefaults(webBuilder =>
+        return Host.CreateDefaultBuilder().ConfigureWebHostDefaults(webBuilder =>
             {
                 webBuilder.UseStartup<TStartup>().UseSetting(WebHostDefaults.ApplicationKey, typeof(TStartup).GetTypeInfo().Assembly.FullName);
             });

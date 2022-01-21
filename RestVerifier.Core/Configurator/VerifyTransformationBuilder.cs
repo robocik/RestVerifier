@@ -48,8 +48,9 @@ sealed class VerifyTransformationBuilder : IVerifyFuncTransform
         _methodConfig.Transform = method;
     }
 
-    public void Returns<P, R>(Func<P,R> transform)
+    public void Returns<P>(Func<P, object?> transform)
     {
         _methodConfig.ReturnTransform = transform;
     }
+    
 }
