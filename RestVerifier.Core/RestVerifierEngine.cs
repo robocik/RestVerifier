@@ -50,10 +50,6 @@ public class RestVerifierEngine<TClient> where TClient: notnull
             ExecutionContext context = new ExecutionContext(methodInfo);
             try
             {
-                if (methodInfo.Name == "ImportDefinitionsFromCsv")
-                {
-
-                }
 
                 var methodConfig = GetMethodConfiguration(methodInfo);
                 if (methodConfig==null)
@@ -85,10 +81,7 @@ public class RestVerifierEngine<TClient> where TClient: notnull
                     return;
                 }
                 var returnObj = await InvokeMethod(methodInfo, client, values.ToArray());
-                if (methodInfo.Name == "GetPdfFileWithCustomHeader")
-                {
 
-                }
                 Validator.ValidateReturnValue(returnObj);
                 context.Result = ExecutionResult.Success;
                 await InvokeMethodExecuted(context);

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using RestVerifier.Core;
@@ -20,10 +22,7 @@ public class InputValidationActionFilter : IActionFilter
         {
             if (context.ActionDescriptor is ControllerActionDescriptor method)
             {
-                if (method.ActionName == "GetPdfFileWithCustomHeader")
-                {
-                    
-                }
+
                 Type? returnType = method.MethodInfo.ReturnType;
                 if (returnType == typeof(IActionResult) || returnType == typeof(Task<IActionResult>))
                 {
@@ -32,20 +31,6 @@ public class InputValidationActionFilter : IActionFilter
 
                 var returnObj = _requestValidator.AddReturnType(returnType);
                 
-                // if (method.ActionName == "ExecuteSqlQuery")
-                // {
-                //     var ds = (DataSet)returnObj;
-                //     context.Result = new ObjectResult(ds){
-                //         StatusCode = 200
-                //     };;
-                // }
-                // else
-                // {
-                //     context.Result = new JsonResult(returnObj)
-                //     {
-                //         StatusCode = 200
-                //     };
-                // }
                 if (returnObj is IActionResult ar)
                 {
                     context.Result = ar;

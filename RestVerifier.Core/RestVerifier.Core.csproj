@@ -4,6 +4,17 @@
     <TargetFramework>netstandard2.0</TargetFramework>
 	  <LangVersion>latest</LangVersion>
 	  <Nullable>enable</Nullable>
+
+	  <Title>RestVerifier.Core</Title>
+	  <PackageProjectUrl>https://github.com/robocik/RestVerifier</PackageProjectUrl>
+	  <RepositoryUrl>https://github.com/robocik/RestVerifier</RepositoryUrl>
+	  <PackageTags>testing;verification;validation</PackageTags>
+	  <Authors>Roman Podstawa</Authors>
+	  <Company>Roman Podstawa</Company>
+	  <RepositoryType>git</RepositoryType>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <Copyright>Copyright © Robocik 2022</Copyright>
+	  <Description>RestVerifier makes it very easy for developers to test and verify entire communication between Client application and the Server, especially you can easly check if all objects sent between Client &lt;--&gt; Server are serialized/deserialized correctly. This package contains the main logic of RestVerifier.</Description>
   </PropertyGroup>
 
 </Project>

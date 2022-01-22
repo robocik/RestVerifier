@@ -1,19 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-	        <LangVersion>latest</LangVersion>
-	  <Nullable>enable</Nullable>	  
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
 
-		<ItemGroup>
-		<PackageReference Include="AutoFixture" Version="4.17.0" />
-		<PackageReference Include="FluentAssertions" Version="6.3.0" />
-		<PackageReference Include="Moq" Version="4.16.1" />
-		<PackageReference Include="coverlet.collector" Version="3.1.0" />
+		<Title>RestVerifier.FluentAssertions</Title>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/robocik/RestVerifier</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/robocik/RestVerifier</PackageProjectUrl>
+		<Company>Roman Podstawa</Company>
+		<Authors>Roman Podstawa</Authors>
+		<PackageTags>testing;verification;validation</PackageTags>
+		<Copyright>Copyright © Robocik 2022</Copyright>
+		<Description>This extension allows you to use FluentAssertions library for comparing test objects when you use RestVerifier library.</Description>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="FluentAssertions" Version="5.0.0" />
 	</ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\RestVerifier.Core\RestVerifier.Core.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\RestVerifier.Core\RestVerifier.Core.csproj" />
+	</ItemGroup>
 
 </Project>

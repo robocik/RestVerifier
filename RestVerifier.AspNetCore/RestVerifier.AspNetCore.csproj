@@ -1,20 +1,33 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<IsPackable>true</IsPackable>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+
+		<Title>RestVerifier.AspNetCore</Title>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/robocik/RestVerifier</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/robocik/RestVerifier</PackageProjectUrl>
+		<Company>Roman Podstawa</Company>
+		<Authors>Roman Podstawa</Authors>
+		<PackageTags>testing;verification;validation;aspnetcore</PackageTags>
+		<Copyright>Copyright © Robocik 2022</Copyright>
+		<Description>This extension integrate RestVerifier library with ASP.NET Core and allows you to verify correctnes of the communication with your WebAPI</Description>
+	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="6.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="3.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.1" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="3.0.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\RestVerifier.Core\RestVerifier.Core.csproj" />
+		<ProjectReference Include="..\RestVerifier.Core\RestVerifier.Core.csproj" />
 	</ItemGroup>
 </Project>

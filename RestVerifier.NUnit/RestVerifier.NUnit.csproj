@@ -1,13 +1,24 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
 	  <LangVersion>latest</LangVersion>
 	  <Nullable>enable</Nullable>
+
+	  <Title>RestVerifier.NUnit</Title>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <RepositoryType>git</RepositoryType>
+	  <RepositoryUrl>https://github.com/robocik/RestVerifier</RepositoryUrl>
+	  <PackageProjectUrl>https://github.com/robocik/RestVerifier</PackageProjectUrl>
+	  <Company>Roman Podstawa</Company>
+	  <Authors>Roman Podstawa</Authors>
+	  <PackageTags>testing;verification;validation</PackageTags>
+	  <Copyright>Copyright © Robocik 2022</Copyright>
+	  <Description>This extension allows you to use FluentAssertions library for comparing test objects when you use RestVerifier library.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.13.2" />
+    <PackageReference Include="NUnit" Version="3.6.0" />
   </ItemGroup>
 
   <ItemGroup>

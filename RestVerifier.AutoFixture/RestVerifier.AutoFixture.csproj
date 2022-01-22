@@ -3,7 +3,18 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
 	        <LangVersion>latest</LangVersion>
-	  <Nullable>enable</Nullable>	  
+	  <Nullable>enable</Nullable>
+
+	  <Title>RestVerifier.AutoFixture</Title>
+	  <Company>Roman Podstawa</Company>
+	  <Authors>Roman Podstawa</Authors>
+	  <PackageProjectUrl>https://github.com/robocik/RestVerifier</PackageProjectUrl>
+	  <RepositoryUrl>https://github.com/robocik/RestVerifier</RepositoryUrl>
+	  <RepositoryType>git</RepositoryType>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <PackageTags>testing;verification;validation</PackageTags>
+	  <Copyright>Copyright © Robocik 2022</Copyright>
+	  <Description>This extension allows you to use AutoFixture library for generating test objects when you use RestVerifier library.</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +22,6 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AutoFixture" Version="4.17.0" />
+		<PackageReference Include="AutoFixture" Version="4.10.0" />
 	</ItemGroup>
 </Project>
