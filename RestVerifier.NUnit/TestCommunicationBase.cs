@@ -31,17 +31,12 @@ public abstract class TestCommunicationBase<TClient> where TClient:notnull
     [Test, TestCaseSource(nameof(MethodTests))]
     public virtual async Task TestServices(MethodInfo method)
     {
-        _builder.OnMethodExecuted(context =>
-        {
-            context.Abort = context.Exception is not UnauthorizedAccessException;
-            return Task.CompletedTask;
-        }).GetMethods(b => GetMethodFunc(method));
+        _builder.GetMethods(b => GetMethodFunc(method));
         var engine = _builder.Build();
         await engine.TestService();
 
     }
-
-
+    
     public static MethodInfo[] GetMethodFunc(MethodInfo? filter = null)
     {
         var methods = typeof(TClient)

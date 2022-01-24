@@ -31,8 +31,7 @@ public class RestVerifierEngine<TClient> where TClient: notnull
 
     public MethodInfo[] GetMethods()
     {
-        var client = _builder.CreateClient();
-        var clientType = client.GetType();
+        var clientType = typeof(TClient);
         MethodInfo[] methods = _builder.Configuration.GetMethodFunc(clientType);
         return methods;
     }

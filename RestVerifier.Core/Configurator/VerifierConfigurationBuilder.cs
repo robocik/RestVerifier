@@ -16,7 +16,6 @@ public sealed class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<
     private CompareRequestValidator? _requestValidator;
     private Type? _comparerType;
     private Type? _objectCreatorType;
-    private TClient? _client;
 
     private ITestObjectCreator? _objectCreator;
     private IObjectsComparer? _objectComparer;
@@ -304,13 +303,9 @@ public sealed class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<
     
     internal TClient CreateClient()
     {
-        if (_client == null)
-        {
-            var validator = CreateValidator();
-            _client =_clientFactory(validator);
-        }
-
-        return _client;
+        var validator = CreateValidator();
+        var client = _clientFactory(validator);
+        return client;
     }
     
 }
