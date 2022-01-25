@@ -81,4 +81,14 @@ class TestClient
         Data.Add(nameof(GetMethod5), dict);
         return default(T2);
     }
+
+    public int GetMethod6(bool? isTest)
+    {
+        var dict = new Dictionary<string, object>
+        {
+            { nameof(isTest), isTest }
+        };
+        Data.Add(nameof(GetMethod5), dict);
+        return 6;
+    }
 }

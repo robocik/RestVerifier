@@ -38,7 +38,7 @@ public class RestVerifierEngine<TClient> where TClient: notnull
     public async Task TestService()
     {
         Validator = _builder.CreateValidator();
-        var client = _builder.CreateClient();
+        var client = await _builder.CreateClient(Validator);
         var methods = GetMethods();
 
         var paramBuilder = new ParameterBuilder(_builder.Configuration, Validator);
@@ -70,7 +70,6 @@ public class RestVerifierEngine<TClient> where TClient: notnull
                 Console.WriteLine("METHOD: " + methodInfo.Name + " - " + index);
                 Validator.Reset(methodConfig);
 
-                methodConfig.ReturnType = methodInfo.ReturnType.GetTypeWithoutTask();
                 var parameters = methodInfo.GetParameters();
                 IList<object?> values = paramBuilder.AddParameters(methodConfig, parameters);
                 
@@ -107,6 +106,7 @@ public class RestVerifierEngine<TClient> where TClient: notnull
         {
             context.Exception = target.InnerException;
         }
+        context.Abort = true;
 
         await InvokeMethodExecuted(context);
         if (context.Abort)
@@ -136,12 +136,23 @@ public class RestVerifierEngine<TClient> where TClient: notnull
 
     private Task InvokeMethodExecuted(ExecutionContext context)
     {
-        return _builder.Configuration.MethodExecuted(context);
+        if (_builder.Configuration.MethodExecuted != null)
+        {
+            return _builder.Configuration.MethodExecuted(context);
+        }
+
+        return Task.CompletedTask;
+        
     }
 
     private Task InvokeMethodExecuting(ExecutionContext context)
     {
-        return _builder.Configuration.MethodExecuting(context);
+        if (_builder.Configuration.MethodExecuting != null)
+        {
+            return _builder.Configuration.MethodExecuting(context);
+        }
+
+        return Task.CompletedTask;
     }
 
     

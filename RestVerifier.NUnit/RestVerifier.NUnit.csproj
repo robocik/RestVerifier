@@ -5,7 +5,7 @@
 	  <LangVersion>latest</LangVersion>
 	  <Nullable>enable</Nullable>
 
-	  <Version>1.0.1</Version>
+	  <Version>1.0.2</Version>
 	  <Title>RestVerifier.NUnit</Title>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <RepositoryType>git</RepositoryType>
@@ -16,6 +16,7 @@
 	  <PackageTags>testing;verification;validation</PackageTags>
 	  <Copyright>Copyright © Robocik 2022</Copyright>
 	  <Description>This extension allows you to use FluentAssertions library for comparing test objects when you use RestVerifier library.</Description>
+	  <PackageIcon>logoRV.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,4 +27,10 @@
     <ProjectReference Include="..\RestVerifier\RestVerifier.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<None Include="..\RestVerifier\logoRV.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
 </Project>

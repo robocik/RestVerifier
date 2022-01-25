@@ -20,7 +20,7 @@ public class RestVerifierEngineBase_InvalidUsage_Tests
         _builder.CreateClient((validator) =>
         {
             _client = new TestClient(validator);
-            return _client;
+            return Task.FromResult(_client);
         });
 
     }
@@ -58,5 +58,19 @@ public class RestVerifierEngineBase_InvalidUsage_Tests
             
         });
 
+    }
+
+    [Test]
+    public void Verify_Wrong_Type()
+    {
+        Assert.ThrowsAsync<InvalidCastException>(async () =>
+        {
+            _builder.SetMode(EngineMode.Strict);
+            _builder.ConfigureVerify(v => { v.Verify(c => c.GetMethod6(Behavior.Verify<bool>())); });
+
+            var engine = _builder.Build();
+            await engine.TestService();
+
+        });
     }
 }

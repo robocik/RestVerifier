@@ -20,6 +20,7 @@ public abstract class TestCommunicationBase<TClient> where TClient:notnull
     public virtual void CreateFixture()
     {
         _builder = Engine.CreateDefaultBuilder<TClient>();
+        
         ConfigureVerifier(_builder);
     }
 
@@ -56,7 +57,7 @@ public abstract class TestCommunicationBase<TClient> where TClient:notnull
         foreach (var methodInfo in methods)
         {
             var data = new TestCaseData(methodInfo);
-            data.SetName(methodInfo.Name);
+            //data.SetName(methodInfo.Name);
             yield return data;
         }
     }

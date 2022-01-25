@@ -13,16 +13,16 @@ namespace RestVerifier.Core.Configurator;
 public sealed class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<TClient>,ISetupStarter<TClient>,IVerifyStarter<TClient> where TClient: notnull
 {
     public VerifierConfiguration Configuration { get; } = new ();
-    private CompareRequestValidator? _requestValidator;
+    //private CompareRequestValidator? _requestValidator;
     private Type? _comparerType;
     private Type? _objectCreatorType;
 
     private ITestObjectCreator? _objectCreator;
     private IObjectsComparer? _objectComparer;
 
-    private Func<CompareRequestValidator,TClient> _clientFactory= _ =>
+    private Func<CompareRequestValidator,Task<TClient>> _clientFactory= _ =>
     {
-        return Activator.CreateInstance<TClient>();
+        return Task.FromResult(Activator.CreateInstance<TClient>());
     };
 
     ISetupMethod ISetupStarter<TClient>.Setup(Expression<Action<TClient>> method)
@@ -137,6 +137,17 @@ public sealed class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<
                     }
 
                 }
+                else if (argument is UnaryExpression ue)
+                {
+                    if (ue.Operand is MethodCallExpression omc)
+                    {
+                        if (omc.Method.DeclaringType == typeof(Behavior) && omc.Method.Name == nameof(Behavior.Verify))
+                        {
+                            throw new InvalidCastException($"Wrong parameter type for {parameterInfo.Name}");
+                        }
+                        
+                    }
+                }
                 else
                 {
                     paramConfig.VerifyExpression = argument;
@@ -225,7 +236,7 @@ public sealed class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<
     }
 
 
-    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.CreateClient(Func<CompareRequestValidator,TClient> factory)
+    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.CreateClient(Func<CompareRequestValidator,Task<TClient>> factory)
     {
 
         _clientFactory = factory;
@@ -242,13 +253,13 @@ public sealed class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<
         Configuration.ParameterTransforms[typeof(T)] = func;
     }
 
-    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.OnMethodExecuted(Func<ExecutionContext, Task> func)
+    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.OnMethodExecuted(Func<ExecutionContext, Task>? func)
     {
         Configuration.MethodExecuted = func;
         return this;
     }
 
-    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.OnMethodExecuting(Func<ExecutionContext, Task> func)
+    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.OnMethodExecuting(Func<ExecutionContext, Task>? func)
     {
         Configuration.MethodExecuting = func;
         return this;
@@ -290,20 +301,16 @@ public sealed class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<
     }
     internal CompareRequestValidator CreateValidator()
     {
-        if (_requestValidator == null)
-        {
-            var objCreator = CreateObjectCreator();
-            var objTester = CreateObjectsComparer();
-            _requestValidator = new CompareRequestValidator(Configuration,objTester, objCreator);
-        }
+        var objCreator = CreateObjectCreator();
+        var objTester = CreateObjectsComparer();
+        var requestValidator = new CompareRequestValidator(Configuration,objTester, objCreator);
         
-        return _requestValidator;
+        return requestValidator;
     }
 
     
-    internal TClient CreateClient()
+    internal Task<TClient> CreateClient(CompareRequestValidator validator)
     {
-        var validator = CreateValidator();
         var client = _clientFactory(validator);
         return client;
     }

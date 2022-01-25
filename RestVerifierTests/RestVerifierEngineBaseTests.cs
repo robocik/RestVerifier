@@ -27,7 +27,7 @@ public class RestVerifierEngineBaseTests
         _builder.CreateClient((validator) =>
         {
             _client = new TestClient(validator);
-            return _client;
+            return Task.FromResult(_client);
         });
 
     }
@@ -43,6 +43,7 @@ public class RestVerifierEngineBaseTests
             v.Setup(c => c.GetMethod2(Behavior.Generate<string>(), Behavior.Generate<decimal>(), Behavior.Generate<float>())).Skip();
             v.Setup(c => c.GetMethod3(Behavior.Generate<TestParam>())).Skip();
             v.Setup(c => c.GetMethod5<string,int>(Behavior.Generate<TestParam>(),Behavior.Generate<string>())).Skip();
+            v.Setup(c => c.GetMethod6(Behavior.Generate<bool?>())).Skip();
         });
         var engine = _builder.Build();
         await engine.TestService();
@@ -77,6 +78,7 @@ public class RestVerifierEngineBaseTests
         _builder.ConfigureSetup(v =>
         {
             v.Setup(c => c.GetMethod5<string, int>(Behavior.Generate<TestParam>(), Behavior.Generate<string>())).Skip();
+            v.Setup(c => c.GetMethod6(Behavior.Generate<bool?>())).Skip();
         });
         var engine = _builder.Build();
         await engine.TestService();
@@ -286,6 +288,7 @@ public class RestVerifierEngineBaseTests
         _builder.ConfigureSetup(v =>
             {
                 v.Setup(c => c.GetMethod5<string, int>(Behavior.Generate<TestParam>(), Behavior.Generate<string>())).Skip();
+                v.Setup(c => c.GetMethod6(Behavior.Generate<bool?>())).Skip();
             })
             .SetMode(EngineMode.Loose);
         var engine = _builder.Build();
@@ -475,6 +478,7 @@ public class RestVerifierEngineBaseTests
             x.Setup(g => g.GetMethod2(Behavior.Generate<string>(), Behavior.Generate<decimal>(), Behavior.Generate<float>())).Skip();
             x.Setup(g => g.GetMethod4(Behavior.Generate<TestParam>())).Skip();
             x.Setup(c => c.GetMethod5<string, int>(Behavior.Generate<TestParam>(), Behavior.Generate<string>())).Skip();
+            x.Setup(c => c.GetMethod6(Behavior.Generate<bool?>())).Skip();
         });
         _builder.ConfigureVerify(x =>
         {
@@ -575,6 +579,7 @@ public class RestVerifierEngineBaseTests
         _builder.ConfigureSetup(v =>
         {
             v.Setup(c => c.GetMethod5<string, int>(Behavior.Generate<TestParam>(), Behavior.Generate<string>())).Skip();
+            v.Setup(c => c.GetMethod6(Behavior.Generate<bool?>())).Skip();
         });
         var list = new List<MethodInfo>();
         _builder.OnMethodExecuted(c =>
@@ -680,6 +685,7 @@ public class RestVerifierEngineBaseTests
             {
                 x.Setup(g => g.GetMethod1(Behavior.Generate<int>(), Behavior.Generate<string>())).Skip();
                 x.Setup(c => c.GetMethod5<string, int>(Behavior.Generate<TestParam>(), Behavior.Generate<string>())).Skip();
+                x.Setup(c => c.GetMethod6(Behavior.Generate<bool?>())).Skip();
             });
         var engine = _builder.Build();
         await engine.TestService();
@@ -761,4 +767,5 @@ public class RestVerifierEngineBaseTests
 
         Assert.IsTrue(_client.Data.Any(x => x.Key == nameof(TestClient.GetMethod5)));
     }
+    
 }

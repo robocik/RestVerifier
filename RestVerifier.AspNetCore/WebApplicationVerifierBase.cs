@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,27 +9,39 @@ using RestVerifier.Core;
 
 namespace RestVerifier.AspNetCore;
 
+public class CompareRequestValidatorInjector
+{
+    public CompareRequestValidator? Validator { get; set; }
+}
+
 public class WebApplicationVerifierBase<T> : WebApplicationFactory<T> where T:class
 {
-    private readonly CompareRequestValidator? _requestValidator;
-
+    private readonly CompareRequestValidatorInjector _validatorInjector = new ();
     public bool SkipAuthentication { get; set; } = true;
-    public WebApplicationVerifierBase(CompareRequestValidator? requestValidator)
+
+    public bool DisableModelValidation { get; set; } = true;
+
+    public void SetCompareRequestValidator(CompareRequestValidator requestValidator)
     {
-        _requestValidator = requestValidator;
+        _validatorInjector.Validator = requestValidator;
     }
-    
-     
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
 
         builder.ConfigureServices(services =>
         {
-            if (_requestValidator is not null)
+            services.Configure<ApiBehaviorOptions>(options =>
             {
-                services.AddSingleton(_requestValidator);
-            }
-            
+                options.SuppressModelStateInvalidFilter = DisableModelValidation;
+            });
+            services.AddSingleton(_validatorInjector);
+            services.AddScoped(s =>
+            {
+                var injector = s.GetService<CompareRequestValidatorInjector>();
+                return injector.Validator;
+            });
+
             if (SkipAuthentication)
             {
                 services.AddSingleton<IAuthorizationHandler, AllowAnonymous>();    
@@ -36,12 +49,13 @@ public class WebApplicationVerifierBase<T> : WebApplicationFactory<T> where T:cl
             
             services.AddControllers(options =>
             {
-                if (_requestValidator is not null)
+                options.Filters.Add(typeof(InputValidationActionFilter));
+
+                if (SkipAuthentication)
                 {
-                    options.Filters.Add(typeof(InputValidationActionFilter));
+                    options.Filters.Add(typeof(AllowAnonymousFilter));
                 }
                 
-                options.Filters.Add(typeof(AllowAnonymousFilter));
             });
         });
 

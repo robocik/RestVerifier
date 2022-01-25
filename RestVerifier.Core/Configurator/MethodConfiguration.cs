@@ -18,6 +18,7 @@ public sealed class MethodConfiguration
     public MethodConfiguration(MethodInfo methodInfo)
     {
         MethodInfo = methodInfo;
+        ReturnType = methodInfo.ReturnType.GetTypeWithoutTask();
     }
 
     public MethodInfo MethodInfo { get; }

@@ -5,7 +5,7 @@
 	  <LangVersion>latest</LangVersion>
 	  <Nullable>enable</Nullable>
 
-	  <Version>1.0.1</Version>
+	  <Version>1.0.2</Version>
 	  <Title>RestVerifier</Title>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <RepositoryType>git</RepositoryType>
@@ -16,11 +16,19 @@
 	  <PackageTags>testing;verification;validation</PackageTags>
 	  <Copyright>Copyright © Robocik 2022</Copyright>
 	  <Description>RestVerifier makes it very easy for developers to test and verify entire communication between Client application and the Server, especially you can easly check if all objects sent between Client &lt;--&gt; Server are serialized/deserialized correctly. This package is just an entry point which simplify usage.</Description>
+	  <PackageIcon>logoRV.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\RestVerifier.AutoFixture\RestVerifier.AutoFixture.csproj" />
     <ProjectReference Include="..\RestVerifier.Core\RestVerifier.Core.csproj" />
     <ProjectReference Include="..\RestVerifier.FluentAssertions\RestVerifier.FluentAssertions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="logoRV.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 </Project>

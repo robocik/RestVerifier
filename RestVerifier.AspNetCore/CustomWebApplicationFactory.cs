@@ -24,8 +24,4 @@ public class CustomWebApplicationFactory<TStartup>
 
     }
 
-
-    public CustomWebApplicationFactory(CompareRequestValidator? requestValidator) : base(requestValidator)
-    {
-    }
 }

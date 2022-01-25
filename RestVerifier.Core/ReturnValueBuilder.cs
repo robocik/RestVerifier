@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using RestVerifier.Core.Configurator;
+using RestVerifier.Core.Interfaces;
 
 namespace RestVerifier.Core;
 
@@ -30,9 +31,8 @@ public sealed class ReturnValueBuilder
 
     private object? GenerateReturnValue(MethodConfiguration methodConfig)
     {
+
         var returnObject = _requestValidator.Creator.Create(methodConfig.ReturnType!);
-
-
         _requestValidator.Context.AddReturnValue(returnObject);
 
         if (methodConfig.ReturnTransform != null)
@@ -47,7 +47,6 @@ public sealed class ReturnValueBuilder
                 returnObject = (object?)transform.DynamicInvoke(returnObject);
             }
         }
-
         return returnObject;
     }
 }

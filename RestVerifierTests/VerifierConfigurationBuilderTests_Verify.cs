@@ -21,6 +21,7 @@ public class VerifierConfigurationBuilderTests_Verify
         builder = new();
         starter = builder;
     }
+
     [Test]
     public void Parse_expressions()
     {
@@ -90,6 +91,7 @@ public class VerifierConfigurationBuilderTests_Verify
         Assert.IsTrue(m2Param2.Ignore);
         Assert.IsFalse(m2Param3.Ignore);
     }
+
 
     
 }

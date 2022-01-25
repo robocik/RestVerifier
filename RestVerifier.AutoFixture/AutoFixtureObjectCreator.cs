@@ -18,13 +18,13 @@ public class AutoFixtureObjectCreator:ITestObjectCreator
         Configure(Fixture);
     }
 
-    private  void Configure(Fixture fixture)
+    protected virtual void Configure(Fixture fixture)
     {
         fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
             .ForEach(b => Fixture.Behaviors.Remove(b));
         fixture.Behaviors.Add(new OmitOnRecursionBehavior());
     }
-    public object? Create(Type type)
+    public virtual object? Create(Type type)
     {
         var obj = Fixture.Create(new SeededRequest(type, null), _context);
         return obj;

@@ -25,10 +25,10 @@ public interface IGlobalSetupStarter<TClient> where TClient: notnull
 
     RestVerifierEngine<TClient> Build();
 
-    IGlobalSetupStarter<TClient> CreateClient(Func<CompareRequestValidator, TClient> factory);
+    IGlobalSetupStarter<TClient> CreateClient(Func<CompareRequestValidator, Task<TClient>> factory);
     
 
-    IGlobalSetupStarter<TClient> OnMethodExecuted(Func<ExecutionContext,Task> func);
+    IGlobalSetupStarter<TClient> OnMethodExecuted(Func<ExecutionContext,Task>? func);
 
-    IGlobalSetupStarter<TClient> OnMethodExecuting(Func<ExecutionContext, Task> func);
+    IGlobalSetupStarter<TClient> OnMethodExecuting(Func<ExecutionContext, Task>? func);
 }

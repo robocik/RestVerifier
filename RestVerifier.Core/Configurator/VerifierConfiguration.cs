@@ -48,18 +48,6 @@ public sealed class VerifierConfiguration
         return null;
     }
 
-    public Func<ExecutionContext, Task> MethodExecuting { get; internal set; } = context =>
-    {
-        return Task.CompletedTask;
-    };
-
-    public Func<ExecutionContext, Task> MethodExecuted { get; internal set; } = context =>
-    {
-        if (context.Exception is not null)
-        {
-            context.Abort = true;
-        }
-
-        return Task.CompletedTask;
-    };
+    public Func<ExecutionContext, Task>? MethodExecuting { get; internal set; }
+    public Func<ExecutionContext, Task>? MethodExecuted { get; internal set; } 
 }
