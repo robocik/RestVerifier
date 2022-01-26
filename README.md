@@ -119,3 +119,69 @@ We have used RestVerifier to make this verification and guess what. We have foun
 - sometimes we even forgot to migrate specific server method to ASP.NET
 
 There are so many potential problems that can occure so having a good unit tests validating your communication layer is a must!
+
+## How to customize tests?
+
+### Specify methods to tests
+By default RestVerifier will check every public method in your class. Methods from base classes will be skipped. You can change this scope with GetMethods
+
+```cs
+protected override void ConfigureVerifier(IGlobalSetupStarter<FileDataService> builder)
+{
+   builder.GetMethods(type =>
+   {
+        return type.GetMethods(BindingFlags.Public);
+   });
+}
+```
+### Skip method
+If you don't want to verify (invoke) specific method you can do this:
+```cs
+protected override void ConfigureVerifier(IGlobalSetupStarter<FileDataService> builder)
+{
+    builder.ConfigureSetup(x =>
+    {
+        x.Setup(g => g.DeleteFile(Behavior.Generate<Guid>())).Skip();
+    });
+}
+In this case RestVerifier will check all methods returned by GetMethods except DeleteFile.
+
+### Specify test values
+By default, RestVerifier generates random (test) data for every method parameters. If you want to invoke a method with specific values, you can:
+
+```cs
+protected override void ConfigureVerifier(IGlobalSetupStarter<FileDataService> builder)
+{
+   builder.ConfigureSetup(x =>
+   {
+        x.Setup(g => g.UploadAvatarFull(Behavior.Generate<UploadFileParam>(), new MemoryStream()));
+   });
+}
+```
+In this example first value will be generated but second is specified as an empty MemoryStream;
+
+### Ignore parameter
+RestVerifier generate a value for every parameter. Then on the ASP.NET side it will verify if all transfered parameters are equals. Basically if your client method has 2 parameters, then RestVerifier expects that in your controller you will also have two parameters. But sometimes this is not the case. You can inform RestVerifier that specific parameter should be ignore (it will not be verified on the server side):
+For example:
+Client side
+```cs
+Task UploadAvatarFull(UploadFileParam fileParam, Stream fileContent);
+```
+
+ASP.NET
+```cs
+[HttpPost("uploadAvatarFull")]
+public async Task<IActionResult> UploadAvatarFull([FromBody]UploadFileParam? meta )
+```
+
+Only first parameter is send to the server and should be check. Second (Stream) should be ignored. Here is a configuration:
+    
+```cs
+protected override void ConfigureVerifier(IGlobalSetupStarter<FileDataService> builder)
+{
+    builder.ConfigureVerify(x =>
+    {
+        x.Verify(g => g.UploadAvatarFull(Behavior.Verify<UploadFileParam>(), Behavior.Ignore<Stream>()));
+    });
+}
+```
