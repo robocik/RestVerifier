@@ -329,9 +329,9 @@ If we have many WebAPI controllers which returns a value with specific type and 
 
 **Client side**
 ```cs
-Task<Stream> TestMethod1(ManualDTO manual,FileMetaData fileParam);
+Task<Stream> TestMethod1(Guid id);
 
-Task<Stream> TestMethod2(ManualDTO manual,PersonDTO person,DateTime date);
+Task<Stream> TestMethod2(Guid id,DateTime date);
 ```
 
 **ASP.NET**
@@ -339,11 +339,13 @@ Task<Stream> TestMethod2(ManualDTO manual,PersonDTO person,DateTime date);
 [HttpGet]
 public async Task<IActionResult> TestMethod1(Guid id)
 {
+    ...
      return File(retValue.Content, retValue.MimeType,retValue.FileName);
 }
 [HttpGet]
 public async Task<IActionResult> TestMethod2(Guid id,DateTime date)
 {
+    ...
      return File(retValue.Content, retValue.MimeType,retValue.FileName);
 }
 ```
