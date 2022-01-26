@@ -251,3 +251,119 @@ protected override void ConfigureVerifier(IGlobalSetupStarter<FileDataService> b
  }
 ```
 In this example we inform RestVerifier to create an instance of UploadAvatarParameter class and fill it with the client parameters;
+
+### Transform return value
+There are cases when your WebAPI return some value and than your client code convert it to another type. In this case, we need to inform RestVerify, how to deal with this:
+
+**Client side**
+```cs
+Task<Guid> UploadFile(FileMetaData fileParam, Stream fileContent);
+```
+
+**ASP.NET**
+```cs
+[HttpPost]
+public async Task<IActionResult> UploadFile([FromBody] FileMetaData? uploadParam)
+{
+     return new FileAccessToken("url", "token", Guid.NewGuid());
+}
+```
+
+**Configuration**
+```cs
+builder.ConfigureVerify(cons =>
+{
+    cons.Verify(g => g.UploadFile(Behavior.Verify<FileMetaData>(), Behavior.Ignore<Stream>()))
+        .Returns<Guid>(g =>
+    {
+        var token = new FileAccessToken("blob url", "test token",g);
+        return token;
+    });
+});
+```
+
+WebAPI returns type FileAccessToken but client code Guid only. In the configuration, we define, how to convert one type to another.
+
+### Global parameters transformation
+If you have many client methods where we should ignore the same parameter type, we can configure this globally.
+
+**Client side**
+```cs
+Task<Guid> TestMethod1(ManualDTO manual,FileMetaData fileParam);
+
+Task<string> TestMethod2(ManualDTO manual,PersonDTO person,DateTime date);
+```
+
+**ASP.NET**
+```cs
+[HttpPost]
+public async Task<IActionResult> TestMethod1([FromBody] FileMetaData? uploadParam)
+{
+     ...
+}
+[HttpPost]
+public async Task<IActionResult> TestMethod2([FromBody] PersonDTO person,[FromQuery]DateTime date)
+{
+     ...
+}
+```
+
+**Configuration**
+```cs
+builder.ConfigureVerify(cons =>
+{
+    config.Transform((paramInfo, paramValue) =>
+    {
+         if (paramValue.Value is ManualDTO)
+         {
+              paramValue.Ignore = true;
+         }
+    });
+});
+```
+In this example we have two methods with ManualDTO parameter. Do need to ignore them in verification process. We can do this globally (per value Type)
+
+### Global return value transformations
+
+If we have many WebAPI controllers which returns a value with specific type and then on the client code we convert this value to another type, we can inform RestVerifier globally how to deal with this situation
+
+**Client side**
+```cs
+Task<Stream> TestMethod1(ManualDTO manual,FileMetaData fileParam);
+
+Task<Stream> TestMethod2(ManualDTO manual,PersonDTO person,DateTime date);
+```
+
+**ASP.NET**
+```cs
+[HttpGet]
+public async Task<IActionResult> TestMethod1(Guid id)
+{
+     return File(retValue.Content, retValue.MimeType,retValue.FileName);
+}
+[HttpGet]
+public async Task<IActionResult> TestMethod2(Guid id,DateTime date)
+{
+     return File(retValue.Content, retValue.MimeType,retValue.FileName);
+}
+```
+
+**Configuration**
+```cs
+builder.ConfigureVerify(cons =>
+{
+    config.ReturnTransform<Stream>(b =>
+    {
+        var memory = (MemoryStream)b.Content;
+        var newMemory = new MemoryStream();
+        memory.CopyTo(newMemory);
+        newMemory.Position = 0;
+        memory.Position = 0;
+        return new FileStreamResult(memory, b.MimeType)
+        {
+            FileDownloadName = b.FileName
+        };
+    });
+});
+```
+In this case, our controller methods return FileStreamResult but client methods return Stream. In configuration we add a transformation for this situation and it will be used automatically for every method returns Stream
