@@ -185,3 +185,69 @@ protected override void ConfigureVerifier(IGlobalSetupStarter<FileDataService> b
     });
 }
 ```
+### Simple parameter transformation
+In many cases in client code we use complex type as a parameter value, but we send a single value to the Server (for example ID).
+
+**Client side**
+```cs
+Task DeletePerson(PersonDTO person);
+```
+
+**ASP.NET**
+```cs
+[HttpDelete("deletePerson")]
+public async Task<IActionResult> DeletePerson(Guid id )
+```
+
+**Configuration**
+```cs
+protected override void ConfigureVerifier(IGlobalSetupStarter<NoteDataService> builder)
+{
+   builder.ConfigureVerify(x =>
+   {
+       x.Verify(v => v.DeletePerson(Behavior.Transform<PersonDTO>(o => o.Id)));
+   });
+}
+```
+
+### Complex parameters transformation
+Sometimes on the client side we have a few parameters but on the Server side we have one class with properties representing all those parameters.
+
+**Client side**
+```cs
+Task UploadAvatarFull(UploadFileParam fileParam, Stream fileContent)
+```
+
+**ASP.NET**
+```cs
+public class UploadAvatarParameter
+{
+    public Stream? File { get; set; }
+    public UploadFileParam? Meta { get; set; }
+}
+    
+[HttpPost("uploadAvatarFull")]
+public async Task<IActionResult> UploadAvatarFull(UploadAvatarParameter uploadParam)
+```
+
+**Configuration**
+```cs
+protected override void ConfigureVerifier(IGlobalSetupStarter<FileDataService> builder)
+{
+    builder.ConfigureVerify(cons =>
+    {
+        cons.Verify(g => g.UploadAvatarFull(Behavior.Verify<UploadFileParam>(), Behavior.Verify<Stream>()))
+        .Transform<UploadFileParam,Stream>((p1, p2) =>
+              {
+                var param = new UploadAvatarParameter()
+                {
+                   Meta = p1,
+                   File = p2
+              };
+              return new[] { param };
+         });
+
+    });
+ }
+```
+In this example we inform RestVerifier to create an instance of UploadAvatarParameter class and fill it with the client parameters;
