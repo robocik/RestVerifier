@@ -27,6 +27,11 @@ public class InputValidationActionFilter : IActionFilter
                 {
 
                     Type? returnType = method.MethodInfo.ReturnType;
+                    if (returnType.IsVoid())
+                    {
+                        context.Result = new NoContentResult();
+                        return;
+                    }
                     if (returnType == typeof(IActionResult) || returnType == typeof(Task<IActionResult>))
                     {
                         returnType = null;

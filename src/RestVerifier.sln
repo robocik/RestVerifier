@@ -9,13 +9,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestVerifier.AspNetCore", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestVerifier.Tests", "RestVerifierTests\RestVerifier.Tests.csproj", "{72F8DC95-E3E3-4892-8D82-B2498FF491B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestVerifier.NUnit", "RestVerifier.NUnit\RestVerifier.NUnit.csproj", "{1C4CF1A8-8F4B-4C8E-AC74-4E698903B4B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestVerifier.NUnit", "RestVerifier.NUnit\RestVerifier.NUnit.csproj", "{1C4CF1A8-8F4B-4C8E-AC74-4E698903B4B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestVerifier.AutoFixture", "RestVerifier.AutoFixture\RestVerifier.AutoFixture.csproj", "{0BFADFF5-407F-4BDB-8CCB-1FA76D875B82}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestVerifier.AutoFixture", "RestVerifier.AutoFixture\RestVerifier.AutoFixture.csproj", "{0BFADFF5-407F-4BDB-8CCB-1FA76D875B82}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestVerifier.FluentAssertions", "RestVerifier.FluentAssertions\RestVerifier.FluentAssertions.csproj", "{1374A46B-DEAE-4B0C-9E2F-4546D28645B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestVerifier.FluentAssertions", "RestVerifier.FluentAssertions\RestVerifier.FluentAssertions.csproj", "{1374A46B-DEAE-4B0C-9E2F-4546D28645B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestVerifier.Core", "RestVerifier.Core\RestVerifier.Core.csproj", "{45C2374F-49AE-46E7-A7F0-2F57D282FAE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestVerifier.Core", "RestVerifier.Core\RestVerifier.Core.csproj", "{45C2374F-49AE-46E7-A7F0-2F57D282FAE0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestVerifier.Tests.AspNetCore", "RestVerifier.Tests.AspNetCore\RestVerifier.Tests.AspNetCore.csproj", "{884BBCCB-9967-46BD-8DD4-DD8BA6018E58}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{45C2374F-49AE-46E7-A7F0-2F57D282FAE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45C2374F-49AE-46E7-A7F0-2F57D282FAE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45C2374F-49AE-46E7-A7F0-2F57D282FAE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{884BBCCB-9967-46BD-8DD4-DD8BA6018E58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{884BBCCB-9967-46BD-8DD4-DD8BA6018E58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{884BBCCB-9967-46BD-8DD4-DD8BA6018E58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{884BBCCB-9967-46BD-8DD4-DD8BA6018E58}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

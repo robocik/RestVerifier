@@ -18,11 +18,11 @@ public sealed class ReturnValueBuilder
     }
     public object? AddReturnType(MethodConfiguration methodConfig,Type? type)
     {
-        methodConfig.ReturnType ??= type;
-        if (methodConfig.ReturnType.IsVoid())
+        if (type != null)
         {
-            return null;
+            methodConfig.ReturnType = type;
         }
+        
 
         methodConfig.ReturnType = methodConfig.ReturnType!.GetTypeWithoutTask();
 

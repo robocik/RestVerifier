@@ -11,6 +11,7 @@ using RestVerifier.Core.Interfaces;
 
 namespace RestVerifier.NUnit;
 
+
 [TestFixture]
 public abstract class TestCommunicationBase<TClient> where TClient:notnull
 {

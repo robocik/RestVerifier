@@ -25,7 +25,7 @@ public class WebApplicationVerifierBase<T> : WebApplicationFactory<T> where T:cl
     {
         _validatorInjector.Validator = requestValidator;
     }
-
+    
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
 
@@ -58,6 +58,6 @@ public class WebApplicationVerifierBase<T> : WebApplicationFactory<T> where T:cl
                 
             });
         });
-
+        base.ConfigureWebHost(builder);
     }
 }

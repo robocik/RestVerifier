@@ -1,34 +1,34 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-	        <LangVersion>latest</LangVersion>
-	  <Nullable>enable</Nullable>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
 
-	  <Version>1.0.2</Version>
-	  <Title>RestVerifier.AutoFixture</Title>
-	  <Company>Roman Podstawa</Company>
-	  <Authors>Roman Podstawa</Authors>
-	  <PackageProjectUrl>https://github.com/robocik/RestVerifier</PackageProjectUrl>
-	  <RepositoryUrl>https://github.com/robocik/RestVerifier</RepositoryUrl>
-	  <RepositoryType>git</RepositoryType>
-	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-	  <PackageTags>testing;verification;validation</PackageTags>
-	  <Copyright>Copyright © Robocik 2022</Copyright>
-	  <Description>This extension allows you to use AutoFixture library for generating test objects when you use RestVerifier library.</Description>
-	  <PackageIcon>logoRV.png</PackageIcon>
-  </PropertyGroup>
+		<Version>1.0.2</Version>
+		<Title>RestVerifier.AutoFixture</Title>
+		<Company>Roman Podstawa</Company>
+		<Authors>Roman Podstawa</Authors>
+		<PackageProjectUrl>https://github.com/robocik/RestVerifier</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/robocik/RestVerifier</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageTags>testing;verification;validation</PackageTags>
+		<Copyright>Copyright © Robocik 2022</Copyright>
+		<Description>This extension allows you to use AutoFixture library for generating test objects when you use RestVerifier library.</Description>
+		<PackageIcon>logoRV.png</PackageIcon>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\RestVerifier\logoRV.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\RestVerifier\logoRV.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\RestVerifier.Core\RestVerifier.Core.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\RestVerifier.Core\RestVerifier.Core.csproj" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="AutoFixture" Version="4.10.0" />
