@@ -27,6 +27,11 @@ For NUnit tests:
 PM> Install-Package RestVerifier.NUnit 
 ```
 
+## Example
+
+Sample project where **RestVerifier** is used:
+https://github.com/robocik/NotesApp_V4_With_CommunicationTests
+
 ## How this works?
 
 In many projects, we have WebAPI created in ASP.NET and uses REST and HTTP as a transport layer. On the client side we use HttpClient class to send request to the server. It is a good practice to separate code for this communication to the separate class. So this could looks similar to this:
