@@ -1,4 +1,4 @@
-# ![image info](./RestVerifier/logoRV.png) RestVerifier
+# ![RestVerifier logo](./docs/logoRV.png) RestVerifier
 
 [![.NET](https://github.com/robocik/RestVerifier/actions/workflows/dotnet.yml/badge.svg)](https://github.com/robocik/RestVerifier/actions/workflows/dotnet.yml)
 [![.NET](https://img.shields.io/nuget/v/RestVerifier)](https://www.nuget.org/packages/RestVerifier)
@@ -104,12 +104,15 @@ public class NoteDataServiceTests : RestVerifier.NUnit.TestCommunicationBase<Not
     }
 }
 ```
-This is all what you need to verify your communication layer. RestVerifier will check every method in NoteDataService: create test data and invoke it. On the WebAPI side it will validate if all properties and fields in every parameter has been sent correctly and then it create test return data and sent it back to the client. Then returned value is verified of course.
-Of course this example is very easy. In real projects things much more difficult. But don't worry - RestVerifier is very flexible and you can customize your tests.
+This is all what you need to verify your communication layer. **RestVerifier** will check every method in NoteDataService: create test data and invoke it. On the WebAPI side it will validate if all properties and fields in every parameter has been sent correctly and then it create test return data and sent it back to the client. Then returned value is verified of course.
+
+![Test result](./docs/restverifier_readme1.png) 
+
+Of course this example is very easy. In real projects things much more difficult. But don't worry - **RestVerifier** is very flexible and you can customize your tests.
 
 ## Real world scenario
-In one commercial project, we had Server application (Windows Service) uses WCF as a transport layer. In WPF application we had a class resposible for entire communication (let's call it NoteDataService from example above). In this class we had over 830 methods for invoking server operations. 
-Recently we wanted to migrate this project to .NET 6. The new Server application should be created as WebAPI in ASP.NET and use REST and HTTP protocol. After many days of working, we have migrated all methods to HttpClient invocations. This was a great achievment but we weren't sure if this migration is created correctly. How do you know, if every object and every property has been serialized properly?
+In one commercial project, we had Server application (Windows Service) uses WCF as a transport layer. In **WPF** application we had a class resposible for entire communication (let's call it NoteDataService from example above). In this class we had over 830 methods for invoking server operations. 
+Recently we wanted to migrate this project to .NET 6. The new Server application should be created as **WebAPI** in **ASP.NET** and use **REST** and **HTTP** protocol. After many days of working, we have migrated all methods to HttpClient invocations. This was a great achievment but we weren't sure if this migration is created correctly. How do you know, if every object and every property has been serialized properly?
 We have used RestVerifier to make this verification and guess what. We have found many many bugs in our communication layer:
 - sometimes we use different parameter names on both sides
 - sometimes we forgot to add [FromBody] attribute
@@ -123,7 +126,7 @@ There are so many potential problems that can occure so having a good unit tests
 ## How to customize tests?
 
 ### Specify methods to tests
-By default RestVerifier will check every public method in your class. Methods from base classes will be skipped. You can change this scope with GetMethods
+By default **RestVerifier** will check every public method in your class. Methods from base classes will be skipped. You can change this scope with **GetMethods**
 
 ```cs
 protected override void ConfigureVerifier(IGlobalSetupStarter<FileDataService> builder)
@@ -147,7 +150,7 @@ protected override void ConfigureVerifier(IGlobalSetupStarter<FileDataService> b
 In this case RestVerifier will check all methods returned by GetMethods except DeleteFile.
 
 ### Specify test values
-By default, RestVerifier generates random (test) data for every method parameters. If you want to invoke a method with specific values, you can:
+By default, **RestVerifier** generates random (test) data for every method parameters. If you want to invoke a method with specific values, you can:
 
 ```cs
 protected override void ConfigureVerifier(IGlobalSetupStarter<FileDataService> builder)
@@ -158,7 +161,7 @@ protected override void ConfigureVerifier(IGlobalSetupStarter<FileDataService> b
    });
 }
 ```
-In this example first value will be generated but second is specified as an empty MemoryStream;
+In this example first value will be generated but second is specified as an empty **MemoryStream**;
 
 ### Ignore parameter
 RestVerifier generate a value for every parameter. Then on the ASP.NET side it will verify if all transfered parameters are equals. Basically if your client method has 2 parameters, then RestVerifier expects that in your controller you will also have two parameters. But sometimes this is not the case. You can inform RestVerifier that specific parameter should be ignore (it will not be verified on the server side):
@@ -250,7 +253,7 @@ protected override void ConfigureVerifier(IGlobalSetupStarter<FileDataService> b
     });
  }
 ```
-In this example we inform RestVerifier to create an instance of UploadAvatarParameter class and fill it with the client parameters;
+In this example we inform **RestVerifier** to create an instance of _UploadAvatarParameter_ class and fill it with the client parameters;
 
 ### Transform return value
 There are cases when your WebAPI return some value and than your client code convert it to another type. In this case, we need to inform RestVerify, how to deal with this:
@@ -282,10 +285,10 @@ builder.ConfigureVerify(cons =>
 });
 ```
 
-WebAPI returns type FileAccessToken but client code Guid only. In the configuration, we define, how to convert one type to another.
+**WebAPI** returns type _FileAccessToken_ but client code **Guid** only. In the configuration, we define, how to convert one type to another.
 
 ### Global parameters transformation
-If you have many client methods where we should ignore the same parameter type, we can configure this globally.
+If you have many client methods where we should ignore the same parameter type, we can configure this globaly.
 
 **Client side**
 ```cs
@@ -321,7 +324,7 @@ builder.ConfigureVerify(cons =>
     });
 });
 ```
-In this example we have two methods with ManualDTO parameter. Do need to ignore them in verification process. We can do this globally (per value Type)
+In this example we have two methods with _ManualDTO_ parameter. Do need to ignore them in verification process. We can do this globally (per value Type)
 
 ### Global return value transformations
 
