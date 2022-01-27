@@ -152,7 +152,8 @@ protected override void ConfigureVerifier(IGlobalSetupStarter<FileDataService> b
         x.Setup(g => g.DeleteFile(Behavior.Generate<Guid>())).Skip();
     });
 }
-In this case RestVerifier will check all methods returned by GetMethods except DeleteFile.
+```
+In this case **RestVerifier** will check all methods returned by **GetMethods** except _DeleteFile_.
 
 ### Specify test values
 By default, **RestVerifier** generates random (test) data for every method parameters. If you want to invoke a method with specific values, you can:
