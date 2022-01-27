@@ -325,7 +325,7 @@ In this example we have two methods with ManualDTO parameter. Do need to ignore 
 
 ### Global return value transformations
 
-If we have many WebAPI controllers which returns a value with specific type and then on the client code we convert this value to another type, we can inform RestVerifier globally how to deal with this situation
+If we have many **WebAPI** controllers which returns a value with specific type and then on the client code we convert this value to another type, we can inform RestVerifier globally how to deal with this situation
 
 **Client side**
 ```cs
@@ -368,4 +368,56 @@ builder.ConfigureVerify(cons =>
     });
 });
 ```
-In this case, our controller methods return FileStreamResult but client methods return Stream. In configuration we add a transformation for this situation and it will be used automatically for every method returns Stream
+In this case, our controller methods return **FileStreamResult** but client methods return Stream. In configuration we add a transformation for this situation and it will be used automatically for every method returns **Stream**
+
+### Customize test data creator (AutoFixture)
+By default, **RestVerifier** uses [AutoFixture](https://github.com/AutoFixture/AutoFixture/) library for creating test data. For most types, it works great without any additional configuration. But for some types, we need to provide more information, how to create test values.
+One approach is to create your own **Object Creator** class inherits from the standard one and override **Configure** method. There you have an access to AutoFixture
+```cs
+public class NoteBookAppObjectCreator:AutoFixtureObjectCreator
+{
+    protected override void Configure(Fixture fixture)
+    {
+        base.Configure(fixture);
+        fixture.Register<byte[], Stream>((byte[] data) => new MemoryStream(data));
+        fixture.Register<byte[], MemoryStream>((byte[] data) => new MemoryStream(data));
+        fixture.Customizations.Add(
+            new TypeRelay(
+                typeof(System.IO.Stream),
+                typeof(MemoryStream)));
+    }
+}
+```
+Next step is to configure **RestVerifier** to use this class
+```cs
+protected override void ConfigureVerifier(IGlobalSetupStarter<FileDataService> builder)
+{
+   builder.UseObjectCreator<NoteBookAppObjectCreator>();
+}
+```
+Detailed info about **AutoFixture** configuration you can find [here](https://autofixture.github.io/docs/quick-start/)
+
+### Customize objects comparison (FluentAssertions)
+By default, **RestVerifier** uses [FluentAssertions](https://fluentassertions.com/) library for objects comparision. For most types, default implementation works great, but of course sometimes our WebAPI uses special types which we should compare differently.
+To override a way how **RestVerifier** compares objects, you can create your own **Comparer Class** inherits from **FluentAssertionComparer** and override **Compare** method.
+```cs
+public class NoteBookAppAssertionComparer : FluentAssertionComparer
+{
+    public override void Compare(object obj1, object obj2)
+    {
+        if (obj1 is UploadAvatarParameter fc1)
+        {
+            obj1 = fc1.Meta;
+        }
+        base.Compare(obj1, obj2);
+    }
+}
+```
+The last step is to configure **RestVerifier** to use this class
+```cs
+protected override void ConfigureVerifier(IGlobalSetupStarter<FileDataService> builder)
+{
+   builder.UseComparer<NoteBookAppAssertionComparer>();
+}
+```
+Detailed info about **FluentAssertions** configuration you can find [here](https://fluentassertions.com/introduction)
