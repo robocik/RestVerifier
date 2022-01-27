@@ -16,5 +16,5 @@ public enum ServiceError
 public class ErrorDetails
 {
     public ServiceError ServiceError { get; set; }
-    public string? Message { get; set; }
+    public string Message { get; set; }
 }

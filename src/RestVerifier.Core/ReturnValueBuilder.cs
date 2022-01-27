@@ -18,11 +18,7 @@ public sealed class ReturnValueBuilder
     }
     public object? AddReturnType(MethodConfiguration methodConfig,Type? type)
     {
-        if (type != null)
-        {
-            methodConfig.ReturnType = type;
-        }
-        
+        methodConfig.ReturnType ??= type;
 
         methodConfig.ReturnType = methodConfig.ReturnType!.GetTypeWithoutTask();
 
@@ -31,7 +27,6 @@ public sealed class ReturnValueBuilder
 
     private object? GenerateReturnValue(MethodConfiguration methodConfig)
     {
-
         var returnObject = _requestValidator.Creator.Create(methodConfig.ReturnType!);
         _requestValidator.Context.AddReturnValue(returnObject);
 
