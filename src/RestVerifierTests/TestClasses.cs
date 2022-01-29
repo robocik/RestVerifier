@@ -59,7 +59,8 @@ class TestClient
             { nameof(param1), param1 }
         };
         Data.Add(nameof(GetMethod3), dict);
-        return (string)RequestValidator.AddReturnType(typeof(TestParam));
+        var res= (TestParam)RequestValidator.AddReturnType(typeof(TestParam));
+        return res.Prop1;
     }
 
     public void GetMethod4(TestParam param1)

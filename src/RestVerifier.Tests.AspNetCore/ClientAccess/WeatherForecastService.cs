@@ -65,4 +65,37 @@ public class WeatherForecastService: DataServiceBase
             return res!;
         }).ConfigureAwait(false);
     }
+
+
+    public async Task<string> GetPersonName(Guid id)
+    {
+        var url = GetUrl($"weatherforecast/GetPerson?id={id}");
+
+        return await Execute(async httpClient =>
+        {
+            var res = await httpClient.GetFromJsonAsync<PersonDTO>(url, CreateOptions()).ConfigureAwait(false);
+            return res!.Name;
+        }).ConfigureAwait(false);
+    }
+    public async Task<string> GetPersonNameAction(Guid id)
+    {
+        var url = GetUrl($"weatherforecast/GetPersonAction?id={id}");
+
+        return await Execute(async httpClient =>
+        {
+            var res = await httpClient.GetFromJsonAsync<PersonDTO>(url, CreateOptions()).ConfigureAwait(false);
+            return res!.Name;
+        }).ConfigureAwait(false);
+    }
+
+    public async Task UpdatePersonName(Guid id,string name)
+    {
+        var url = GetUrl($"weatherforecast/UpdatePersonName");
+
+        await Execute(async httpClient =>
+        {
+            var res = await httpClient.PostAsJsonAsync(url, (id:id, personName: name), CreateOptions()).ConfigureAwait(false);
+            return res;
+        }).ConfigureAwait(false);
+    }
 }

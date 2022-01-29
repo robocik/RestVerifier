@@ -79,14 +79,14 @@ public class RestVerifierEngineBaseTests
         {
             v.Setup(c => c.GetMethod5<string, int>(Behavior.Generate<TestParam>(), Behavior.Generate<string>())).Skip();
             v.Setup(c => c.GetMethod6(Behavior.Generate<bool?>())).Skip();
+            v.Setup(c => c.GetMethod3(Behavior.Generate<TestParam>())).Skip();
         });
         var engine = _builder.Build();
         await engine.TestService();
 
-        Assert.AreEqual(4, _client.Data.Count);
+        Assert.AreEqual(3, _client.Data.Count);
         Assert.IsNotNull(_client.Data[nameof(TestClient.GetMethod1)]);
         Assert.IsNotNull(_client.Data[nameof(TestClient.GetMethod2)]);
-        Assert.IsNotNull(_client.Data[nameof(TestClient.GetMethod3)]);
         Assert.IsNotNull(_client.Data[nameof(TestClient.GetMethod4)]);
     }
 
@@ -173,8 +173,8 @@ public class RestVerifierEngineBaseTests
         {
             x.Setup(c => c.GetMethod2("Specific value", Behavior.Generate<decimal>(), Behavior.Generate<float>())).Skip();
             x.Setup(g => g.GetMethod1(Behavior.Generate<int>(), Behavior.Generate<string>())).Skip();
-            x.Setup(g => g.GetMethod4(Behavior.Generate<TestParam>())).Skip();
-            x.Setup(c => c.GetMethod3(new TestParam()
+            x.Setup(g => g.GetMethod3(Behavior.Generate<TestParam>())).Skip();
+            x.Setup(c => c.GetMethod4(new TestParam()
             {
                 Prop1="Test1"
             }));
@@ -182,7 +182,7 @@ public class RestVerifierEngineBaseTests
         var engine = _builder.Build();
         await engine.TestService();
 
-        var data = _client.Data[nameof(TestClient.GetMethod3)];
+        var data = _client.Data[nameof(TestClient.GetMethod4)];
         Assert.IsTrue(data.Values.Any(x => ((TestParam)x).Prop1 == "Test1"));
         var specifiedParam = _client.Context.Values.Single(x => x.Name == "param1");
         var value = (TestParam)specifiedParam.Value!;
@@ -223,15 +223,15 @@ public class RestVerifierEngineBaseTests
         {
             x.Setup(c => c.GetMethod2("Specific value", Behavior.Generate<decimal>(), Behavior.Generate<float>())).Skip();
             x.Setup(g => g.GetMethod1(Behavior.Generate<int>(), Behavior.Generate<string>())).Skip();
-            x.Setup(g => g.GetMethod4(Behavior.Generate<TestParam>())).Skip();
-            x.Setup(c => c.GetMethod3(new TestParam()
+            x.Setup(g => g.GetMethod3(Behavior.Generate<TestParam>())).Skip();
+            x.Setup(c => c.GetMethod4(new TestParam()
             {
                 Prop1 = "Test1"
             }));
         });
         _builder.ConfigureVerify(v =>
         {
-            v.Verify(c => c.GetMethod3(new TestParam()
+            v.Verify(c => c.GetMethod4(new TestParam()
             {
                 Prop1 = "Verify test"
             }));
@@ -239,7 +239,7 @@ public class RestVerifierEngineBaseTests
         var engine = _builder.Build();
         await engine.TestService();
 
-        var data = _client.Data[nameof(TestClient.GetMethod3)];
+        var data = _client.Data[nameof(TestClient.GetMethod4)];
         Assert.IsTrue(data.Values.Any(x => ((TestParam)x).Prop1 == "Test1"));
         var specifiedParam = _client.Context.Values.Single(x => x.Name == "param1");
         var value = (TestParam)specifiedParam.Value!;
@@ -254,10 +254,10 @@ public class RestVerifierEngineBaseTests
         bool invoked = false;
         _builder.ConfigureVerify(x =>
             {
-                x.ReturnTransform<string>(h =>
+                x.ReturnTransform<TestParam>(h =>
                 {
                     invoked = true;
-                    return h;
+                    return h.Prop1;
                 });
             })
             .ConfigureSetup(x =>
@@ -283,7 +283,7 @@ public class RestVerifierEngineBaseTests
                 invoked = true;
                 return h;
             });
-
+            x.Verify(c => c.GetMethod3(Behavior.Verify<TestParam>())).Returns<TestParam>(j=>j.Prop1);
         });
         _builder.ConfigureSetup(v =>
             {
@@ -310,15 +310,15 @@ public class RestVerifierEngineBaseTests
             })
             .ConfigureVerify(x=>
             {
-                x.ReturnTransform<string>(h =>
+                x.ReturnTransform<TestParam>(h =>
                 {
                     invokedType = true;
                     return h;
                 });
-                x.Verify(u => u.GetMethod3(Behavior.Verify<TestParam>())).Returns<string>(k =>
+                x.Verify(u => u.GetMethod3(Behavior.Verify<TestParam>())).Returns<TestParam>(k =>
                 {
                     invokedMethod = true;
-                    return k;
+                    return k.Prop1;
                 });
             });
         var engine = _builder.Build();
@@ -482,6 +482,7 @@ public class RestVerifierEngineBaseTests
         });
         _builder.ConfigureVerify(x =>
         {
+            x.Verify(g => g.GetMethod3(Behavior.Verify<TestParam>())).Returns<TestParam>(h=>h.Prop1);
             x.Transform((x, v) =>
             {
                 if (x.ParameterType == typeof(TestParam))
@@ -518,13 +519,13 @@ public class RestVerifierEngineBaseTests
             })
             .ConfigureSetup(x =>
             {
-                x.Setup(c => c.GetMethod3(Behavior.Generate<TestParam>()));
+                x.Setup(c => c.GetMethod4(Behavior.Generate<TestParam>()));
                 
             });
         var engine = _builder.Build();
         await engine.TestService();
 
-        var data = _client.Data[nameof(TestClient.GetMethod3)];
+        var data = _client.Data[nameof(TestClient.GetMethod4)];
         Assert.IsTrue(invoked);
         var val = (TestParam)data.Values.Single();
         Assert.AreNotEqual("Test", val.Prop1);
@@ -557,7 +558,7 @@ public class RestVerifierEngineBaseTests
             c.Verify(b => b.GetMethod3(Behavior.Transform<TestParam>(g => new TestParam()
             {
                 Prop1 = "Local"
-            })));
+            }))).Returns<TestParam>(h=>h.Prop1);
         });
         var engine = _builder.Build();
         await engine.TestService();
@@ -580,6 +581,7 @@ public class RestVerifierEngineBaseTests
         {
             v.Setup(c => c.GetMethod5<string, int>(Behavior.Generate<TestParam>(), Behavior.Generate<string>())).Skip();
             v.Setup(c => c.GetMethod6(Behavior.Generate<bool?>())).Skip();
+            v.Setup(c => c.GetMethod3(Behavior.Generate<TestParam>())).Skip();
         });
         var list = new List<MethodInfo>();
         _builder.OnMethodExecuted(c =>
@@ -594,7 +596,7 @@ public class RestVerifierEngineBaseTests
         var engine = _builder.Build();
         await engine.TestService();
 
-        Assert.AreEqual(3,list.Count);
+        Assert.AreEqual(2,list.Count);
         Assert.IsFalse(list.Any(x=>x.Name==nameof(TestClient.GetMethod1)));
     }
 
@@ -635,7 +637,7 @@ public class RestVerifierEngineBaseTests
         });
         _builder.ConfigureVerify(c =>
         {
-            c.Verify(k => k.GetMethod2(Behavior.Transform<string>(h => "wrong"),Behavior.Verify<decimal>(), Behavior.Verify<float>())).Returns<TestParam>(j=>j.Prop1);
+            c.Verify(k => k.GetMethod2(Behavior.Transform<string>(h => "wrong"),Behavior.Verify<decimal>(), Behavior.Verify<float>())).Returns<string>(j=>new TestParam(){Prop1 = j});
         });
         _builder.OnMethodExecuted(c =>
         {
@@ -658,11 +660,14 @@ public class RestVerifierEngineBaseTests
     {
         _builder.ConfigureVerify(c =>
         {
-            c.Verify(k => k.GetMethod2(Behavior.Transform<string>(h => "wrong"), Behavior.Verify<decimal>(), Behavior.Verify<float>())).Returns<TestParam>(j => j.Prop1);
+            c.Verify(k => k.GetMethod2(Behavior.Transform<string>(h => "wrong"), Behavior.Verify<decimal>(), Behavior.Verify<float>())).Returns<TestParam>(j =>
+            {
+                throw new InvalidCastException();
+            });
         });
         var engine = _builder.Build();
         var ex=Assert.ThrowsAsync<VerifierExecutionException>(async () => await engine.TestService());
-        Assert.IsTrue(ex.InnerException is InvalidCastException);
+        Assert.IsTrue(ex.InnerException.InnerException is InvalidCastException);
         Assert.AreEqual(nameof(TestClient.GetMethod2),ex.Method.Name);
         
         Assert.IsFalse(_client.Data.Keys.Any(x=>x==nameof(TestClient.GetMethod3)));
@@ -686,11 +691,12 @@ public class RestVerifierEngineBaseTests
                 x.Setup(g => g.GetMethod1(Behavior.Generate<int>(), Behavior.Generate<string>())).Skip();
                 x.Setup(c => c.GetMethod5<string, int>(Behavior.Generate<TestParam>(), Behavior.Generate<string>())).Skip();
                 x.Setup(c => c.GetMethod6(Behavior.Generate<bool?>())).Skip();
+                x.Setup(c => c.GetMethod3(Behavior.Generate<TestParam>())).Skip();
             });
         var engine = _builder.Build();
         await engine.TestService();
 
-        Assert.AreEqual(3, list.Count);
+        Assert.AreEqual(2, list.Count);
         Assert.IsFalse(list.Any(x => x.Name == nameof(TestClient.GetMethod1)));
     }
 

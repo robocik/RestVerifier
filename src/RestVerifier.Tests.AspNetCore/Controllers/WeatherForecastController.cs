@@ -54,5 +54,11 @@ namespace RestVerifier.Tests.AspNetCore.Controllers
         {
             return null;
         }
+
+        [HttpPost("UpdatePersonName")]
+        public Task<IActionResult> UpdatePersonName([FromBody] (Guid id, string personName) param)
+        {
+            return null;
+        }
     }
 }

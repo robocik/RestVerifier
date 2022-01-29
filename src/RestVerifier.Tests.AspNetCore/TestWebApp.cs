@@ -97,4 +97,54 @@ class TestWebApp
         var engine = _builder.Build();
         await engine.TestService();
     }
+
+    [Test]
+    public void controller_method_returns_task_iactionresult_and_returns_string_but_in_client_code_we_expect_PersonDTO()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.GetPersonName(Behavior.Verify<Guid>()));
+        });
+        var engine = _builder.Build();
+        var exception=Assert.ThrowsAsync<VerifierExecutionException>(()=> engine.TestService());
+        Assert.IsTrue(exception!.InnerException is AssertionException);
+    }
+
+    [Test]
+    public async Task controller_method_returns_task_PersonDTO_but_in_client_code_we_returns_string()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.GetPersonName(Behavior.Verify<Guid>())).Returns<PersonDTO>(v=>v.Name);
+        });
+        var engine = _builder.Build();
+        await engine.TestService();
+    }
+
+    [Test]
+    public async Task controller_method_returns_iactionresult_but_in_client_code_we_returns_string()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.GetPersonNameAction(Behavior.Verify<Guid>())).Returns<PersonDTO>(v => v.Name);
+        });
+        var engine = _builder.Build();
+        await engine.TestService();
+    }
+
+    [Test]
+    public async Task valuetuple_parameter()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.UpdatePersonName(Behavior.Verify<Guid>(), Behavior.Verify<string>()))
+                .Transform<Guid, string>(
+                    (p1, p2) =>
+                    {
+                        return new object[]{(id: p1, personName: p2)};
+                    });
+        });
+        var engine = _builder.Build();
+        await engine.TestService();
+    }
 }

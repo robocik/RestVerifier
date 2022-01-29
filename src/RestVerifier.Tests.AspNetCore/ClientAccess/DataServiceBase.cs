@@ -15,11 +15,14 @@ public abstract class DataServiceBase
         _httpClient = httpClient;
     }
 
-    protected JsonSerializerOptions CreateOptions()
+    protected JsonSerializerSettings CreateOptions()
     {
-        var options = new JsonSerializerOptions()
+        var options = new JsonSerializerSettings()
         {
-            PropertyNameCaseInsensitive = true
+            TypeNameHandling = TypeNameHandling.Auto,
+            PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+            ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+            //ReferenceHandler = ReferenceHandler.Preserve
         };
         return options;
     }

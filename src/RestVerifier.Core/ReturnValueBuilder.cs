@@ -18,8 +18,12 @@ public sealed class ReturnValueBuilder
     }
     public object? AddReturnType(MethodConfiguration methodConfig,Type? type)
     {
-        methodConfig.ReturnType ??= type;
+       
 
+        if (type is not null)
+        {
+            methodConfig.ReturnType = type;
+        }
         methodConfig.ReturnType = methodConfig.ReturnType!.GetTypeWithoutTask();
 
         return GenerateReturnValue(methodConfig);
@@ -27,21 +31,29 @@ public sealed class ReturnValueBuilder
 
     private object? GenerateReturnValue(MethodConfiguration methodConfig)
     {
+        var parameter = methodConfig.ReturnTransform?.Method.GetParameters().SingleOrDefault();
+        if (parameter != null)
+        {
+            methodConfig.ReturnType = parameter.ParameterType;
+        }
         var returnObject = _requestValidator.Creator.Create(methodConfig.ReturnType!);
-        _requestValidator.Context.AddReturnValue(returnObject);
+        var valueToValidate = returnObject;
 
         if (methodConfig.ReturnTransform != null)
         {
-            returnObject = (object?)methodConfig.ReturnTransform.DynamicInvoke(returnObject);
+            
+            valueToValidate = (object?)methodConfig.ReturnTransform.DynamicInvoke(returnObject);
         }
         else
         {
             var transform = _configuration.GetReturnTransform(methodConfig.ReturnType!);
             if (transform != null)
             {
-                returnObject = (object?)transform.DynamicInvoke(returnObject);
+                valueToValidate = (object?)transform.DynamicInvoke(returnObject);
             }
         }
+
+        _requestValidator.Context.AddReturnValue(valueToValidate);
         return returnObject;
     }
 }
