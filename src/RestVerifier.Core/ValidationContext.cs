@@ -5,13 +5,15 @@ namespace RestVerifier.Core;
 
 public class ValidationContext : IRemoteServiceContext
 {
-    private object? returnObject;
+    public static object NotSet = new object();
+
+    private object? returnObject= NotSet;
 
     private List<ParameterValue> values = new();
-    private List<object?> valuesToCompare = new();
+    private List<ParameterValue> valuesToCompare = new();
     public IEnumerable<ParameterValue> Values => values;
 
-    public IEnumerable<object?> ValuesToCompare => valuesToCompare;
+    public IEnumerable<ParameterValue> ValuesToCompare => valuesToCompare;
 
     public object? ReturnObject => returnObject;
 
@@ -24,7 +26,21 @@ public class ValidationContext : IRemoteServiceContext
     public void AddValues(params object?[] param)
     {
         valuesToCompare.Clear();
-        valuesToCompare.AddRange(param);
+        foreach (var obj in param)
+        {
+            if (obj is ParameterValue pv)
+            {
+                valuesToCompare.Add(pv);
+            }
+            else
+            {
+                valuesToCompare.Add(new ParameterValue(null)
+                {
+                    ValueToCompare = obj
+                });
+            }
+        }
+        
     }
 
     public void AddReturnValue(object? value)
@@ -36,6 +52,6 @@ public class ValidationContext : IRemoteServiceContext
     {
         valuesToCompare.Clear();
         values.Clear();
-        returnObject = null;
+        returnObject = NotSet;
     }
 }

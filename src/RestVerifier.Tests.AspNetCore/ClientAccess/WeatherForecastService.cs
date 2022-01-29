@@ -33,6 +33,17 @@ public class WeatherForecastService: DataServiceBase
         }).ConfigureAwait(false);
     }
 
+    public async Task GetMethod2Void()
+    {
+        var url = GetUrl("weatherforecast/GetMethod2");
+
+        await Execute(async httpClient =>
+        {
+            var res = await httpClient.GetAsync(url).ConfigureAwait(false);
+            return res!;
+        }).ConfigureAwait(false);
+    }
+
     public async Task<PersonDTO> GetPerson(PersonDTO person)
     {
         var url = GetUrl($"weatherforecast/GetPerson?id={person.Id}");
@@ -96,6 +107,28 @@ public class WeatherForecastService: DataServiceBase
         {
             var res = await httpClient.PostAsJsonAsync(url, (id:id, personName: name), CreateOptions()).ConfigureAwait(false);
             return res;
+        }).ConfigureAwait(false);
+    }
+
+    public async Task<string> ParametersOrder(string address,string name)
+    {
+        var url = GetUrl($"weatherforecast/ParametersOrder?address={address}&name={name}");
+
+        return await Execute(async httpClient =>
+        {
+            var res = await httpClient.GetFromJsonAsync<string>(url, CreateOptions()).ConfigureAwait(false);
+            return res!;
+        }).ConfigureAwait(false);
+    }
+
+    public async Task<string> ParametersOrderWithDifferentParamNames(string address1, string name1)
+    {
+        var url = GetUrl($"weatherforecast/ParametersOrder?address={address1}&name={name1}");
+
+        return await Execute(async httpClient =>
+        {
+            var res = await httpClient.GetFromJsonAsync<string>(url, CreateOptions()).ConfigureAwait(false);
+            return res!;
         }).ConfigureAwait(false);
     }
 }

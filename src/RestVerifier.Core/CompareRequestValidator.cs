@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using RestVerifier.Core.Configurator;
 using RestVerifier.Core.Interfaces;
+using RestVerifier.Core.Matchers;
 
 namespace RestVerifier.Core;
 
@@ -18,12 +19,14 @@ public class CompareRequestValidator
     public ITestObjectCreator Creator { get; }
     private ValidationContext _context = new ();
     private MethodConfiguration? _currentMethod;
+    private IParameterMatchStrategy _matcher;
     
-    public CompareRequestValidator(VerifierConfiguration configuration, IObjectsComparer comparer, ITestObjectCreator creator)
+    public CompareRequestValidator(VerifierConfiguration configuration, IObjectsComparer comparer, ITestObjectCreator creator, IParameterMatchStrategy matcher)
     {
         _configuration = configuration;
         _comparer = comparer;
         Creator = creator;
+        _matcher = matcher;
     }
 
     public IRemoteServiceContext Context => _context;
@@ -46,20 +49,21 @@ public class CompareRequestValidator
 
         if (contextActionArguments.Values.Count > 0)
         {
-            var newValue = contextActionArguments.Values.ToList();
-            for (var index = 0; index < newValue.Count; index++)
-            {
-                var originalValue = values[index];
-                var value = newValue[index];
-                Comparer.Compare(value,originalValue);
-            }
+            _matcher.Match(Comparer,contextActionArguments, values);
         }
         
         return true;
     }
 
+    
+
+
     public void ValidateReturnValue(object? returnValue)
     {
+        if (ValidationContext.NotSet == _context.ReturnObject && _context.ReturnObject!=returnValue)
+        {
+            throw new ArgumentOutOfRangeException("ReturnType","No return value. Probably your controller method is void but your client method has different return type");
+        }
         Comparer.Compare(returnValue, _context.ReturnObject);
     }
 

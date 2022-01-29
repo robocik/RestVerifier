@@ -3,6 +3,7 @@ using System.Net;
 using System.Security.Authentication;
 using System.Text;
 using Newtonsoft.Json;
+using NUnit.Framework;
 using RestVerifier.Tests.AspNetCore.Model;
 
 namespace RestVerifier.Tests.AspNetCore.ClientAccess;
@@ -96,7 +97,8 @@ public static class NewtonsoftHttpClientExtensions
                 throw new InvalidOperationException(message);
             case ServiceError.ArgumentOutOfRangeException:
                 throw new ArgumentOutOfRangeException(message);
-                throw new AuthenticationException(message);
+            case ServiceError.AssertException:
+                throw new AssertionException(message);
 
         }
 

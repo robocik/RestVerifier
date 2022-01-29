@@ -11,7 +11,8 @@ public enum ServiceError
     InvalidOperationException,
     ArgumentOutOfRangeException,
     ConstraintException,
-    InvalidHouseTypeException
+    InvalidHouseTypeException,
+    AssertException
 }
 public class ErrorDetails
 {

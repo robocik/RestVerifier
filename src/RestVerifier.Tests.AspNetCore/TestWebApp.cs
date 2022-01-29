@@ -54,7 +54,7 @@ class TestWebApp
     }
 
     [Test]
-    public void Test2_wrong_return_type_in_controller__void_but_should_be_something_else()
+    public void wrong_return_type_in_controller__void_but_should_be_something_else()
     {
         _builder.ConfigureSetup(x =>
         {
@@ -62,7 +62,18 @@ class TestWebApp
         });
         var engine = _builder.Build();
         var exception=Assert.ThrowsAsync<VerifierExecutionException>(()=>engine.TestService());
-        Assert.IsTrue(exception!.InnerException is JsonException);
+        Assert.IsTrue(exception!.InnerException is ArgumentOutOfRangeException);
+    }
+
+    [Test]
+    public async Task void_type()
+    {
+        _builder.ConfigureSetup(x =>
+        {
+            x.Setup(b => b.GetMethod2Void());
+        });
+        var engine = _builder.Build();
+        await engine.TestService();
     }
 
     [Test]
@@ -144,6 +155,66 @@ class TestWebApp
                         return new object[]{(id: p1, personName: p2)};
                     });
         });
+        var engine = _builder.Build();
+        await engine.TestService();
+    }
+
+    [Test]
+    public void different_parameters_order_position_matcher()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.ParametersOrder(Behavior.Verify<string>(), Behavior.Verify<string>()));
+        });
+        var engine = _builder.Build();
+        var exception = Assert.ThrowsAsync<VerifierExecutionException>(() => engine.TestService());
+        Assert.IsTrue(exception!.InnerException is AssertionException);
+    }
+
+    [Test]
+    public async Task different_parameters_order_name_matcher()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.ParametersOrder(Behavior.Verify<string>(), Behavior.Verify<string>()));
+        });
+        _builder.UseNameMatchingStrategy();
+        var engine = _builder.Build();
+        await engine.TestService();
+    }
+
+    [Test]
+    public async Task different_parameters_order_with_different_param_names_name_matcher__transform()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.ParametersOrderWithDifferentParamNames(Behavior.Verify<string>(), Behavior.Verify<string>()))
+                .Transform<string,string>((address, name) =>
+                {
+                    return new object?[]{new ParameterValue("address")
+                    {
+                        ValueToCompare = address
+                    }, 
+                        new ParameterValue("name")
+                    {
+                        ValueToCompare = name
+                    }};
+                });
+        });
+        _builder.UseNameMatchingStrategy();
+        var engine = _builder.Build();
+        await engine.TestService();
+    }
+
+    [Test]
+    public async Task different_parameters_order_with_different_param_names_name_matcher__set_name_name()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(
+                b => b.ParametersOrderWithDifferentParamNames(Behavior.Verify<string>("address"), Behavior.Verify<string>("name")));
+        });
+        _builder.UseNameMatchingStrategy();
         var engine = _builder.Build();
         await engine.TestService();
     }

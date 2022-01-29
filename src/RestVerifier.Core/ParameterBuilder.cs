@@ -23,13 +23,20 @@ sealed class ParameterBuilder
         var list = new List<ParameterValue>();
         foreach (var parameterInfo in parameters)
         {
-
-            var paramValue = new ParameterValue(parameterInfo.Name!);
             ParameterConfiguration? paramConfig = null;
+            string name=parameterInfo.Name;
+            bool ignore=false;
             if (methodConfig?.Parameters.TryGetValue(parameterInfo, out paramConfig) == true)
             {
-                paramValue.Ignore = paramConfig!.VerifyBehavior == VerifyBehavior.Ignore;
+                ignore = paramConfig!.VerifyBehavior == VerifyBehavior.Ignore;
+                name = paramConfig.GetName();
             }
+            var paramValue = new ParameterValue(name)
+            {
+                Ignore = ignore
+            };
+            
+            
             paramValue.Value = EvaluateInitialValue(paramConfig, parameterInfo);
 
             paramValue.ValueToCompare = EvaluateVerifyValue(paramConfig, paramValue);
@@ -54,7 +61,7 @@ sealed class ParameterBuilder
         }
         else
         {
-            arr = list.Where(x => !x.Ignore).Select(x => x.ValueToCompare).ToArray();
+            arr = list.Where(x => !x.Ignore).ToArray();
         }
         _requestValidator.Context.AddParameters(list.ToArray());
         _requestValidator.Context.AddValues(arr);

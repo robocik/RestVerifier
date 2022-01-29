@@ -353,7 +353,12 @@ public class RestVerifierEngineBaseTests
         await engine.TestService();
 
         Assert.IsTrue(invoked);
-        Assert.AreEqual("test", _client.Context.ValuesToCompare.Single());
+        
+        var param1 = _client.Context.ValuesToCompare.Single();
+        Assert.AreEqual("test", param1.ValueToCompare);
+        Assert.IsNull(param1.Name);
+        Assert.IsNull(param1.Value);
+
     }
 
     [Test]
@@ -383,7 +388,10 @@ public class RestVerifierEngineBaseTests
         await engine.TestService();
 
         Assert.IsTrue(invoked);
-        Assert.AreEqual("test", _client.Context.ValuesToCompare.Single());
+        var param1 = _client.Context.ValuesToCompare.Single();
+        Assert.AreEqual("test", param1.ValueToCompare);
+        Assert.IsNull(param1.Name);
+        Assert.IsNull(param1.Value);
     }
 
     [Test]
@@ -465,7 +473,10 @@ public class RestVerifierEngineBaseTests
         await engine.TestService();
 
         Assert.IsTrue(invoked);
-        Assert.AreEqual("test1test", _client.Context.ValuesToCompare.Single());
+        var param1=_client.Context.ValuesToCompare.Single();
+        Assert.AreEqual("test1test", param1.ValueToCompare);
+        Assert.IsNull(param1.Name);
+        Assert.IsNull(param1.Value);
     }
 
     [Test]
@@ -603,10 +614,12 @@ public class RestVerifierEngineBaseTests
     [Test]
     public async Task on_method_executed_callback_abort_if_success()
     {
-        _builder.SetMode(EngineMode.Loose);
+        _builder.SetMode(EngineMode.Strict);
         _builder.ConfigureSetup(v =>
         {
             v.Setup(c => c.GetMethod5<string, int>(Behavior.Generate<TestParam>(), Behavior.Generate<string>())).Skip();
+            v.Setup(c => c.GetMethod1(Behavior.Generate<int>(), Behavior.Generate<string>()));
+            v.Setup(c => c.GetMethod2(Behavior.Generate<string>(), Behavior.Generate<decimal>(), Behavior.Generate<float>()));
         });
         var list = new List<MethodInfo>();
         _builder.OnMethodExecuted(c =>
@@ -630,10 +643,11 @@ public class RestVerifierEngineBaseTests
     public void on_method_executed_callback_abort_if_exception()
     {
         var list = new List<MethodInfo>();
-        _builder.SetMode(EngineMode.Loose);
+        _builder.SetMode(EngineMode.Strict);
         _builder.ConfigureSetup(v =>
         {
             v.Setup(c => c.GetMethod5<string, int>(Behavior.Generate<TestParam>(), Behavior.Generate<string>())).Skip();
+
         });
         _builder.ConfigureVerify(c =>
         {
@@ -712,10 +726,12 @@ public class RestVerifierEngineBaseTests
                 c.Abort = true;
             }
             return Task.CompletedTask;
-        }).SetMode(EngineMode.Loose)
-            .ConfigureSetup(x =>
+        }).SetMode(EngineMode.Strict)
+            .ConfigureSetup(v =>
             {
-                x.Setup(c => c.GetMethod5<string, int>(Behavior.Generate<TestParam>(), Behavior.Generate<string>())).Skip();
+                v.Setup(c => c.GetMethod5<string, int>(Behavior.Generate<TestParam>(), Behavior.Generate<string>())).Skip();
+                v.Setup(c => c.GetMethod1(Behavior.Generate<int>(), Behavior.Generate<string>()));
+                v.Setup(c => c.GetMethod2(Behavior.Generate<string>(), Behavior.Generate<decimal>(), Behavior.Generate<float>()));
             });
         var engine = _builder.Build();
         await engine.TestService();
@@ -773,5 +789,4 @@ public class RestVerifierEngineBaseTests
 
         Assert.IsTrue(_client.Data.Any(x => x.Key == nameof(TestClient.GetMethod5)));
     }
-    
 }

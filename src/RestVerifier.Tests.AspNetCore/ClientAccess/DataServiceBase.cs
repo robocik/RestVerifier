@@ -2,6 +2,7 @@
 using System.Net;
 using System.Text.Json;
 using Newtonsoft.Json;
+using NUnit.Framework;
 using RestVerifier.Tests.AspNetCore.Model;
 
 namespace RestVerifier.Tests.AspNetCore.ClientAccess;
@@ -87,7 +88,8 @@ public abstract class DataServiceBase
                 throw new InvalidOperationException(message);
             case ServiceError.ArgumentOutOfRangeException:
                 throw new ArgumentOutOfRangeException(message);
-
+            case ServiceError.AssertException:
+                throw new AssertionException(message);
         }
         switch (statusCode)
         {

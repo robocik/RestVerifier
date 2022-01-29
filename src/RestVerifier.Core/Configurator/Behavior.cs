@@ -5,6 +5,10 @@ namespace RestVerifier.Core.Configurator;
 
 public sealed class Behavior
 {
+    public static T Verify<T>(string actionParameterName)
+    {
+        return default(T)!;
+    }
     public static T Verify<T>()
     {
         return default(T)!;

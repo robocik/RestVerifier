@@ -17,5 +17,10 @@ public class ParameterConfiguration
     public VerifyBehavior VerifyBehavior { get; set; } = VerifyBehavior.Default;
 
     public bool Ignore => VerifyBehavior == VerifyBehavior.Ignore;
+    public string? Name { get; set; }
 
+    public string GetName()
+    {
+        return Name ?? Parameter.Name;
+    }
 }

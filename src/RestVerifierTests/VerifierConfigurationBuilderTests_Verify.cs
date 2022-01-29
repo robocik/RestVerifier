@@ -92,6 +92,19 @@ public class VerifierConfigurationBuilderTests_Verify
         Assert.IsFalse(m2Param3.Ignore);
     }
 
+    [Test]
+    public void Parse_custom_parameter_name()
+    {
+        starter.Verify(c => c.GetMethod2(Behavior.Verify<string>("test1"), Behavior.Verify<decimal>(), Behavior.Verify<float>("test2")));
 
-    
+        
+        var method2 = builder.Configuration.Methods.Single(x => x.Key.Name == nameof(TestClient.GetMethod2));
+        var m2Param1 = method2.Value.Parameters.Values.Where(x => x.Parameter.Name == "param1").Single();
+        var m2Param2 = method2.Value.Parameters.Values.Where(x => x.Parameter.Name == "param2").Single();
+        var m2Param3 = method2.Value.Parameters.Values.Where(x => x.Parameter.Name == "param3").Single();
+        Assert.AreEqual("test1",m2Param1.Name);
+        Assert.AreEqual(null, m2Param2.Name);
+        Assert.AreEqual("test2", m2Param3.Name);
+    }
+
 }

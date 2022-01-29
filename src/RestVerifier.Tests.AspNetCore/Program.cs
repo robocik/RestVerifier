@@ -1,6 +1,6 @@
-using M6T.Core.TupleModelBinder;
 using Microsoft.AspNetCore.HttpLogging;
 using Newtonsoft.Json;
+using RestVerifier.Tests.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +22,7 @@ builder.Services.AddControllers(options =>
     o.SerializerSettings.ObjectCreationHandling = ObjectCreationHandling.Replace;
 });
 var app = builder.Build();
-
+app.ConfigureExceptionHandler();
 // Configure the HTTP request pipeline.
 app.UseHttpLogging();
 app.UseAuthorization();

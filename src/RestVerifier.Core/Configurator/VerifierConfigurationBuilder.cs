@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using RestVerifier.Core.Configurator;
 using RestVerifier.Core.Interfaces;
+using RestVerifier.Core.Matchers;
 
 namespace RestVerifier.Core.Configurator;
 
@@ -19,6 +20,7 @@ public sealed class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<
 
     private ITestObjectCreator? _objectCreator;
     private IObjectsComparer? _objectComparer;
+    private IParameterMatchStrategy _matchStrategy=new PositionMatchStrategy();
 
     private Func<CompareRequestValidator,Task<TClient>> _clientFactory= _ =>
     {
@@ -29,8 +31,17 @@ public sealed class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<
     {
         return SetupImplementation(method);
     }
-    
 
+    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.UseNameMatchingStrategy()
+    {
+        _matchStrategy = new NameMatchStrategy();
+        return this;
+    }
+    IGlobalSetupStarter<TClient> IGlobalSetupStarter<TClient>.UsePositionMatchingStrategy()
+    {
+        _matchStrategy = new PositionMatchStrategy();
+        return this;
+    }
     private ISetupMethod SetupImplementation(Expression method)
     {
         LambdaExpression lambda = (LambdaExpression)method;
@@ -121,6 +132,12 @@ public sealed class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<
                     }
                     else if (mce.Method.DeclaringType == typeof(Behavior) && mce.Method.Name == nameof(Behavior.Verify))
                     {
+                        var param=mce.Method.GetParameters();
+                        if (mce.Arguments.Count==1)
+                        {
+                            var actionParamNameExpression=(ConstantExpression)mce.Arguments[0];
+                            paramConfig.Name = (string?)actionParamNameExpression.Value;
+                        }
                     }
                     if (mce.Method.DeclaringType == typeof(Behavior) && mce.Method.Name == nameof(Behavior.Generate))
                     {
@@ -303,7 +320,7 @@ public sealed class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<
     {
         var objCreator = CreateObjectCreator();
         var objTester = CreateObjectsComparer();
-        var requestValidator = new CompareRequestValidator(Configuration,objTester, objCreator);
+        var requestValidator = new CompareRequestValidator(Configuration,objTester, objCreator,_matchStrategy);
         
         return requestValidator;
     }

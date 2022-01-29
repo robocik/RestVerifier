@@ -79,7 +79,10 @@ public class RestVerifierEngine<TClient> where TClient: notnull
                     return;
                 }
                 var returnObj = await InvokeMethod(methodInfo, client, values.ToArray());
-
+                if (methodInfo.ReturnType.IsVoid())
+                {
+                    returnObj = ValidationContext.NotSet;
+                }
                 Validator.ValidateReturnValue(returnObj);
                 context.Result = ExecutionResult.Success;
                 await InvokeMethodExecuted(context);

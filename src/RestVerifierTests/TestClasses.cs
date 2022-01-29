@@ -80,7 +80,7 @@ class TestClient
             { nameof(param2), param2 }
         };
         Data.Add(nameof(GetMethod5), dict);
-        return default(T2);
+        return (T2)RequestValidator.AddReturnType(typeof(T2));
     }
 
     public int GetMethod6(bool? isTest)
@@ -90,6 +90,6 @@ class TestClient
             { nameof(isTest), isTest }
         };
         Data.Add(nameof(GetMethod5), dict);
-        return 6;
+        return (int)RequestValidator.AddReturnType(typeof(int));
     }
 }

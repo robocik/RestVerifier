@@ -36,22 +36,31 @@ public sealed class ReturnValueBuilder
         {
             methodConfig.ReturnType = parameter.ParameterType;
         }
-        var returnObject = _requestValidator.Creator.Create(methodConfig.ReturnType!);
-        var valueToValidate = returnObject;
 
-        if (methodConfig.ReturnTransform != null)
+        object? returnObject = ValidationContext.NotSet;
+        object? valueToValidate = ValidationContext.NotSet;
+        if (!methodConfig.ReturnType.IsVoid())
         {
-            
-            valueToValidate = (object?)methodConfig.ReturnTransform.DynamicInvoke(returnObject);
+            returnObject=_requestValidator.Creator.Create(methodConfig.ReturnType!);
+            valueToValidate = returnObject;
+            if (methodConfig.ReturnTransform != null)
+             {
+
+                 valueToValidate = (object?)methodConfig.ReturnTransform.DynamicInvoke(returnObject);
+             }
+             else
+             {
+                 var transform = _configuration.GetReturnTransform(methodConfig.ReturnType!);
+                 if (transform != null)
+                 {
+                     valueToValidate = (object?)transform.DynamicInvoke(returnObject);
+                 }
+             }
         }
-        else
-        {
-            var transform = _configuration.GetReturnTransform(methodConfig.ReturnType!);
-            if (transform != null)
-            {
-                valueToValidate = (object?)transform.DynamicInvoke(returnObject);
-            }
-        }
+        
+        
+
+        
 
         _requestValidator.Context.AddReturnValue(valueToValidate);
         return returnObject;
