@@ -31,6 +31,7 @@ public class CompareRequestValidator
 
     public IRemoteServiceContext Context => _context;
     public IObjectsComparer Comparer => _comparer;
+    public bool ShouldValidateReachEndpoint { get; set; }
 
     public object? AddReturnType(Type? type)
     {
@@ -54,9 +55,7 @@ public class CompareRequestValidator
         
         return true;
     }
-
     
-
 
     public void ValidateReturnValue(object? returnValue)
     {
@@ -72,5 +71,32 @@ public class CompareRequestValidator
         _currentMethod = methodConfiguration;
         _context.Reset();
     }
-    
+
+    public void AddException(Exception exception)
+    {
+        _context.AddException(exception);
+    }
+
+    public void ThrowIfExceptions()
+    {
+        if (_context.Exceptions.Any())
+        {
+            throw new VerifierExecutionException(_currentMethod!.MethodInfo, $"During testing method {_currentMethod!.MethodInfo} exception has been thrown but no exception was raised in your client class. Please verify if you handle exceptions correctly. Source exception you can find in InnerException property", _context.Exceptions.First());
+        }
+    }
+
+    public void ThrowIfNotReachEndpoint()
+    {
+        if (ShouldValidateReachEndpoint && !_context.ReachEndpoint)
+        {
+            throw new VerifierExecutionException(_currentMethod!.MethodInfo, $"During testing method {_currentMethod!.MethodInfo} didn't reach endpoint, which means that no controller action was invoked.");
+        }
+    }
+    public void ReachEndpoint()
+    {
+        _context.MarkReachEndpoint();
+    }
+
+
+
 }

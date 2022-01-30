@@ -107,4 +107,10 @@ public class VerifierConfigurationBuilderTests_Verify
         Assert.AreEqual("test2", m2Param3.Name);
     }
 
+    [Test]
+    public void Parse_verify_invalid_return_type_in_returns()
+    {
+        Assert.Throws<ArgumentException>(()=>starter.Verify(c => c.GetMethod1(Behavior.Ignore<int>(), Behavior.Verify<string>())).Returns<int>(j => j));
+        
+    }
 }

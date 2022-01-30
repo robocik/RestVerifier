@@ -33,4 +33,6 @@ public interface IGlobalSetupStarter<TClient> where TClient: notnull
     IGlobalSetupStarter<TClient> OnMethodExecuting(Func<ExecutionContext, Task>? func);
     IGlobalSetupStarter<TClient> UseNameMatchingStrategy();
     IGlobalSetupStarter<TClient> UsePositionMatchingStrategy();
+
+
 }

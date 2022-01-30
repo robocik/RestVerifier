@@ -23,6 +23,7 @@ public class WebApplicationVerifierBase<T> : WebApplicationFactory<T> where T:cl
 
     public void SetCompareRequestValidator(CompareRequestValidator requestValidator)
     {
+        requestValidator.ShouldValidateReachEndpoint = true;
         _validatorInjector.Validator = requestValidator;
     }
     

@@ -195,6 +195,7 @@ public sealed class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<
         if (methodExpression.Method.IsGenericMethod)
         {
             methodConfig.GenericParameters = methodExpression.Method.GetGenericArguments();
+            methodConfig.ReturnType = methodExpression.Method.ReturnType.GetTypeWithoutTask();
         }
 
         return methodConfig;
@@ -263,6 +264,11 @@ public sealed class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<
     void IVerifyStarter<TClient>.ReturnTransform<T>(Func<T, object?> func)
     {
         Configuration.ReturnTransforms[typeof(T)] = func;
+    }
+
+    void IVerifyStarter<TClient>.ReturnTransform<T, R>(Func<T, R> func)
+    {
+
     }
 
     void IVerifyStarter<TClient>.Transform<T>(Func<T, object?> func)

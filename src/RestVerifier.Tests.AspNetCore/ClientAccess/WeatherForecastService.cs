@@ -131,4 +131,26 @@ public class WeatherForecastService: DataServiceBase
             return res!;
         }).ConfigureAwait(false);
     }
+
+    public async Task GetPersonNoReturn(PersonDTO person)
+    {
+        var url = GetUrl($"weatherforecast/GetPerson?id={person.Id}");
+
+        await Execute(async httpClient =>
+        {
+            var res = await httpClient.GetFromJsonAsync<PersonDTO>(url, CreateOptions()).ConfigureAwait(false);
+            return res!;
+        }).ConfigureAwait(false);
+    }
+
+    public void WrongAsync()
+    {
+        var url = GetUrl($"weatherforecast/GetPerson");
+
+        Execute(async httpClient =>
+        {
+            var res = httpClient.GetFromJsonAsync<PersonDTO>(url, CreateOptions()).ConfigureAwait(false);
+            return res!;
+        }).ConfigureAwait(false);
+    }
 }

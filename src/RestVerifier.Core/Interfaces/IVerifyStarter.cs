@@ -12,6 +12,8 @@ public interface IVerifyStarter<TClient> where TClient:notnull
 
     void ReturnTransform<T>(Func<T, object?> func);
 
+    void ReturnTransform<T,R>(Func<T, R> func);
+
     void Transform<T>(Func<T, object?> func);
 
     void Transform(Action<ParameterInfo, ParameterValue> method);

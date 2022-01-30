@@ -118,7 +118,8 @@ class TestWebApp
         });
         var engine = _builder.Build();
         var exception=Assert.ThrowsAsync<VerifierExecutionException>(()=> engine.TestService());
-        Assert.IsTrue(exception!.InnerException is AssertionException);
+        Assert.IsTrue(exception!.InnerExceptions.Count==2);
+        Assert.IsTrue(exception!.InnerExceptions.Any(x=>x is InvalidCastException));
     }
 
     [Test]
@@ -126,18 +127,19 @@ class TestWebApp
     {
         _builder.ConfigureVerify(x =>
         {
-            x.Verify(b => b.GetPersonName(Behavior.Verify<Guid>())).Returns<PersonDTO>(v=>v.Name);
+            x.Verify(b => b.GetPersonName(Behavior.Verify<Guid>())).Returns<string>(v=>new PersonDTO{Name=v});
         });
         var engine = _builder.Build();
         await engine.TestService();
     }
+    
 
     [Test]
     public async Task controller_method_returns_iactionresult_but_in_client_code_we_returns_string()
     {
         _builder.ConfigureVerify(x =>
         {
-            x.Verify(b => b.GetPersonNameAction(Behavior.Verify<Guid>())).Returns<PersonDTO>(v => v.Name);
+            x.Verify(b => b.GetPersonNameAction(Behavior.Verify<Guid>())).Returns<string>(v => new PersonDTO{Name=v});
         });
         var engine = _builder.Build();
         await engine.TestService();
@@ -172,6 +174,24 @@ class TestWebApp
     }
 
     [Test]
+    public async Task wrong_Async_construction()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.WrongAsync()).NoReturn();
+        });
+        var engine = _builder.Build();
+        //here we have used try...catch instead of Assert.ThrowsAsync because sometimes in this test we don't have exception because somehow wrong async construction inside WrongAsync() method works good ;)
+        //But this shouldn't be a big problem - if in the end user code his async construction works good then there is no problem and test should pass
+        try
+        {
+            await engine.TestService();
+        }
+        catch (VerifierExecutionException e) when (e.Message.Contains("reach endpoint"))
+        {
+        }
+    }
+    [Test]
     public async Task different_parameters_order_name_matcher()
     {
         _builder.ConfigureVerify(x =>
@@ -191,7 +211,7 @@ class TestWebApp
             x.Verify(b => b.ParametersOrderWithDifferentParamNames(Behavior.Verify<string>(), Behavior.Verify<string>()))
                 .Transform<string,string>((address, name) =>
                 {
-                    return new object?[]{new ParameterValue("address")
+                    return new object[]{new ParameterValue("address")
                     {
                         ValueToCompare = address
                     }, 
@@ -215,6 +235,17 @@ class TestWebApp
                 b => b.ParametersOrderWithDifferentParamNames(Behavior.Verify<string>("address"), Behavior.Verify<string>("name")));
         });
         _builder.UseNameMatchingStrategy();
+        var engine = _builder.Build();
+        await engine.TestService();
+    }
+
+    [Test]
+    public async Task no_return_value_on_client_side()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.GetPersonNoReturn(Behavior.Transform<PersonDTO>(h => h.Id))).NoReturn();
+        });
         var engine = _builder.Build();
         await engine.TestService();
     }

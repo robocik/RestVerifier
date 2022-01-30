@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using RestVerifier.Core.Interfaces;
 
 namespace RestVerifier.Core;
 
@@ -11,11 +13,20 @@ public class ValidationContext : IRemoteServiceContext
 
     private List<ParameterValue> values = new();
     private List<ParameterValue> valuesToCompare = new();
+    private bool _reachEndpoint;
     public IEnumerable<ParameterValue> Values => values;
+
+    public bool ReachEndpoint
+    {
+        get => _reachEndpoint;
+        private set => _reachEndpoint = value;
+    }
 
     public IEnumerable<ParameterValue> ValuesToCompare => valuesToCompare;
 
     public object? ReturnObject => returnObject;
+
+    public ICollection<Exception> Exceptions { get; } = new List<Exception>();
 
     public void AddParameters(params ParameterValue[] param)
     {
@@ -40,7 +51,6 @@ public class ValidationContext : IRemoteServiceContext
                 });
             }
         }
-        
     }
 
     public void AddReturnValue(object? value)
@@ -53,5 +63,17 @@ public class ValidationContext : IRemoteServiceContext
         valuesToCompare.Clear();
         values.Clear();
         returnObject = NotSet;
+        Exceptions.Clear();
+        ReachEndpoint = false;
+    }
+
+    public void AddException(Exception exception)
+    {
+        Exceptions.Add(exception);
+    }
+
+    public void MarkReachEndpoint()
+    {
+        ReachEndpoint = true;
     }
 }

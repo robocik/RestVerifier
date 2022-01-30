@@ -63,6 +63,8 @@ class TestClient
         return res.Prop1;
     }
 
+
+
     public void GetMethod4(TestParam param1)
     {
         var dict = new Dictionary<string, object>
@@ -91,5 +93,26 @@ class TestClient
         };
         Data.Add(nameof(GetMethod5), dict);
         return (int)RequestValidator.AddReturnType(typeof(int));
+    }
+
+    public void UpdateMethod1(bool? isTest)
+    {
+        var dict = new Dictionary<string, object>
+        {
+            { nameof(isTest), isTest }
+        };
+        Data.Add(nameof(UpdateMethod1), dict);
+        RequestValidator.AddReturnType(typeof(int));
+    }
+
+    public ITestParam GetMethod7(TestParam param1)
+    {
+        var dict = new Dictionary<string, object>
+        {
+            { nameof(param1), param1 }
+        };
+        Data.Add(nameof(GetMethod7), dict);
+        var res = (TestParam)RequestValidator.AddReturnType(typeof(string));
+        return res;
     }
 }

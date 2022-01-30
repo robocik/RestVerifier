@@ -4,8 +4,11 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
+using AutoFixture;
+using AutoFixture.Kernel;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
+using RestVerifier.AutoFixture;
 using RestVerifier.Core;
 using RestVerifier.Core.Configurator;
 using RestVerifier.Core.Interfaces;
@@ -29,7 +32,9 @@ public class RestVerifierEngineBaseTests
             _client = new TestClient(validator);
             return Task.FromResult(_client);
         });
-
+        var creator = new AutoFixtureObjectCreator();
+        creator.Fixture.Customizations.Add(new TypeRelay(typeof(ITestParam), typeof(TestParam)));
+        _builder.UseObjectCreator(creator);
     }
 
     [Test]
@@ -44,6 +49,8 @@ public class RestVerifierEngineBaseTests
             v.Setup(c => c.GetMethod3(Behavior.Generate<TestParam>())).Skip();
             v.Setup(c => c.GetMethod5<string,int>(Behavior.Generate<TestParam>(),Behavior.Generate<string>())).Skip();
             v.Setup(c => c.GetMethod6(Behavior.Generate<bool?>())).Skip();
+            v.Setup(c => c.UpdateMethod1(Behavior.Generate<bool?>())).Skip();
+            v.Setup(c => c.GetMethod7(Behavior.Generate<TestParam>())).Skip();
         });
         var engine = _builder.Build();
         await engine.TestService();
@@ -80,6 +87,8 @@ public class RestVerifierEngineBaseTests
             v.Setup(c => c.GetMethod5<string, int>(Behavior.Generate<TestParam>(), Behavior.Generate<string>())).Skip();
             v.Setup(c => c.GetMethod6(Behavior.Generate<bool?>())).Skip();
             v.Setup(c => c.GetMethod3(Behavior.Generate<TestParam>())).Skip();
+            v.Setup(c => c.UpdateMethod1(Behavior.Generate<bool?>())).Skip();
+            v.Setup(c => c.GetMethod7(Behavior.Generate<TestParam>())).Skip();
         });
         var engine = _builder.Build();
         await engine.TestService();
@@ -254,10 +263,10 @@ public class RestVerifierEngineBaseTests
         bool invoked = false;
         _builder.ConfigureVerify(x =>
             {
-                x.ReturnTransform<TestParam>(h =>
+                x.ReturnTransform<string>(h =>
                 {
                     invoked = true;
-                    return h.Prop1;
+                    return new TestParam() { Prop1 = h };
                 });
             })
             .ConfigureSetup(x =>
@@ -271,7 +280,19 @@ public class RestVerifierEngineBaseTests
         Assert.IsTrue(invoked);
         Assert.AreEqual(1,data.Values.Count);
     }
-    
+
+    [Test]
+    public async Task different_return_types_but_no_returns_transformation()
+    {
+        _builder.ConfigureSetup(x =>
+            {
+                x.Setup(c => c.GetMethod3(Behavior.Generate<TestParam>()));
+            });
+        var engine = _builder.Build();
+        var ex=Assert.ThrowsAsync<VerifierExecutionException>(()=> engine.TestService());
+        Assert.IsTrue(ex.InnerException is InvalidCastException);
+    }
+
     [Test]
     public async Task type_return_transformation_base_type()
     {
@@ -283,12 +304,14 @@ public class RestVerifierEngineBaseTests
                 invoked = true;
                 return h;
             });
-            x.Verify(c => c.GetMethod3(Behavior.Verify<TestParam>())).Returns<TestParam>(j=>j.Prop1);
+            x.Verify(c => c.GetMethod7(Behavior.Verify<TestParam>()));
         });
         _builder.ConfigureSetup(v =>
             {
                 v.Setup(c => c.GetMethod5<string, int>(Behavior.Generate<TestParam>(), Behavior.Generate<string>())).Skip();
                 v.Setup(c => c.GetMethod6(Behavior.Generate<bool?>())).Skip();
+                v.Setup(g => g.GetMethod3(Behavior.Generate<TestParam>())).Skip();
+                v.Setup(c => c.UpdateMethod1(Behavior.Generate<bool?>())).Skip();
             })
             .SetMode(EngineMode.Loose);
         var engine = _builder.Build();
@@ -310,15 +333,15 @@ public class RestVerifierEngineBaseTests
             })
             .ConfigureVerify(x=>
             {
-                x.ReturnTransform<TestParam>(h =>
+                x.ReturnTransform<string>(h =>
                 {
                     invokedType = true;
-                    return h;
+                    return new TestParam() { Prop1 =h };
                 });
-                x.Verify(u => u.GetMethod3(Behavior.Verify<TestParam>())).Returns<TestParam>(k =>
+                x.Verify(u => u.GetMethod3(Behavior.Verify<TestParam>())).Returns<string>(k =>
                 {
                     invokedMethod = true;
-                    return k.Prop1;
+                    return new TestParam() { Prop1 = k };
                 });
             });
         var engine = _builder.Build();
@@ -490,10 +513,12 @@ public class RestVerifierEngineBaseTests
             x.Setup(g => g.GetMethod4(Behavior.Generate<TestParam>())).Skip();
             x.Setup(c => c.GetMethod5<string, int>(Behavior.Generate<TestParam>(), Behavior.Generate<string>())).Skip();
             x.Setup(c => c.GetMethod6(Behavior.Generate<bool?>())).Skip();
+            x.Setup(c => c.UpdateMethod1(Behavior.Generate<bool?>())).Skip();
+            x.Setup(c => c.GetMethod7(Behavior.Generate<TestParam>())).Skip();
         });
         _builder.ConfigureVerify(x =>
         {
-            x.Verify(g => g.GetMethod3(Behavior.Verify<TestParam>())).Returns<TestParam>(h=>h.Prop1);
+            x.Verify(g => g.GetMethod3(Behavior.Verify<TestParam>())).Returns<string>(h=>new TestParam(){Prop1 = h});
             x.Transform((x, v) =>
             {
                 if (x.ParameterType == typeof(TestParam))
@@ -569,7 +594,7 @@ public class RestVerifierEngineBaseTests
             c.Verify(b => b.GetMethod3(Behavior.Transform<TestParam>(g => new TestParam()
             {
                 Prop1 = "Local"
-            }))).Returns<TestParam>(h=>h.Prop1);
+            }))).Returns<string>(h=>new TestParam(){Prop1 = h});
         });
         var engine = _builder.Build();
         await engine.TestService();
@@ -593,6 +618,8 @@ public class RestVerifierEngineBaseTests
             v.Setup(c => c.GetMethod5<string, int>(Behavior.Generate<TestParam>(), Behavior.Generate<string>())).Skip();
             v.Setup(c => c.GetMethod6(Behavior.Generate<bool?>())).Skip();
             v.Setup(c => c.GetMethod3(Behavior.Generate<TestParam>())).Skip();
+            v.Setup(c => c.UpdateMethod1(Behavior.Generate<bool?>())).Skip();
+            v.Setup(c => c.GetMethod7(Behavior.Generate<TestParam>())).Skip();
         });
         var list = new List<MethodInfo>();
         _builder.OnMethodExecuted(c =>
@@ -651,7 +678,7 @@ public class RestVerifierEngineBaseTests
         });
         _builder.ConfigureVerify(c =>
         {
-            c.Verify(k => k.GetMethod2(Behavior.Transform<string>(h => "wrong"),Behavior.Verify<decimal>(), Behavior.Verify<float>())).Returns<string>(j=>new TestParam(){Prop1 = j});
+            c.Verify(k => k.GetMethod2(Behavior.Transform<string>(h => "wrong"),Behavior.Verify<decimal>(), Behavior.Verify<float>())).Returns<TestParam>(j=>j.Prop1);
         });
         _builder.OnMethodExecuted(c =>
         {
@@ -706,6 +733,8 @@ public class RestVerifierEngineBaseTests
                 x.Setup(c => c.GetMethod5<string, int>(Behavior.Generate<TestParam>(), Behavior.Generate<string>())).Skip();
                 x.Setup(c => c.GetMethod6(Behavior.Generate<bool?>())).Skip();
                 x.Setup(c => c.GetMethod3(Behavior.Generate<TestParam>())).Skip();
+                x.Setup(c => c.UpdateMethod1(Behavior.Generate<bool?>())).Skip();
+                x.Setup(c => c.GetMethod7(Behavior.Generate<TestParam>())).Skip();
             });
         var engine = _builder.Build();
         await engine.TestService();
@@ -788,5 +817,19 @@ public class RestVerifierEngineBaseTests
         await engine.TestService();
 
         Assert.IsTrue(_client.Data.Any(x => x.Key == nameof(TestClient.GetMethod5)));
+    }
+
+    [Test]
+    public async Task client_method_is_void_but_action_method_return_value()
+    {
+        _builder.ConfigureVerify(c =>
+        {
+            c.Verify(b => b.UpdateMethod1(Behavior.Verify<bool?>())).NoReturn();
+        });
+        _builder.SetMode(EngineMode.Strict);
+        var engine = _builder.Build();
+        await engine.TestService();
+
+        Assert.IsTrue(_client.Data.Any(x => x.Key == nameof(TestClient.UpdateMethod1)));
     }
 }

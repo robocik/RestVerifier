@@ -22,39 +22,54 @@ sealed class VerifyTransformationBuilder : IVerifyFuncTransform,IVerifyTransform
         return this;
     }
 
-    void IVerifyTransform.Transform<P1, P2>(Func<P1, P2, object?[]> method)
+    IVerifyTransform IVerifyTransform.Transform<P1, P2>(Func<P1, P2, object?[]> method)
     {
         _methodConfig.Transform = method;
+        return this;
     }
 
-    void IVerifyTransform.Transform<P1, P2, P3>(Func<P1, P2, P3, object?[]> method)
+    IVerifyTransform IVerifyTransform.Transform<P1, P2, P3>(Func<P1, P2, P3, object?[]> method)
     {
         _methodConfig.Transform = method;
+        return this;
     }
 
-    void IVerifyTransform.Transform<P1, P2, P3, P4>(Func<P1, P2, P3, P4, object?[]> method)
+    IVerifyTransform IVerifyTransform.Transform<P1, P2, P3, P4>(Func<P1, P2, P3, P4, object?[]> method)
     {
         _methodConfig.Transform = method;
+        return this;
     }
 
-    void IVerifyTransform.Transform<P1, P2, P3, P4, P5>(Func<P1, P2, P3, P4, P5, object?[]> method)
+    IVerifyTransform IVerifyTransform.Transform<P1, P2, P3, P4, P5>(Func<P1, P2, P3, P4, P5, object?[]> method)
     {
         _methodConfig.Transform = method;
+        return this;
     }
 
-    void IVerifyTransform.Transform<P1, P2, P3, P4, P5, P6>(Func<P1, P2, P3, P4, P5, P6, object?[]> method)
+    IVerifyTransform IVerifyTransform.Transform<P1, P2, P3, P4, P5, P6>(Func<P1, P2, P3, P4, P5, P6, object?[]> method)
     {
         _methodConfig.Transform = method;
+        return this;
     }
 
-    void IVerifyTransform.Transform(Func<object?[], object?[]> method)
+    IVerifyTransform IVerifyTransform.Transform(Func<object?[], object?[]> method)
     {
         _methodConfig.Transform = method;
+        return this;
     }
 
-    void IVerifyTransform.Transform<P1>(Func<P1, object?[]> method)
+    
+
+    IVerifyTransform IVerifyTransform.NoReturn()
+    {
+        _methodConfig.ShouldNotReturnValue = true;
+        return this;
+    }
+
+    IVerifyTransform IVerifyTransform.Transform<P1>(Func<P1, object?[]> method)
     {
         _methodConfig.Transform = method;
+        return this;
     }
 
     IVerifyFuncTransform IVerifyFuncTransform.Transform<P1, P2>(Func<P1, P2, object?[]> method)
@@ -95,8 +110,17 @@ sealed class VerifyTransformationBuilder : IVerifyFuncTransform,IVerifyTransform
 
     IVerifyFuncTransform IVerifyFuncTransform.Returns<P>(Func<P, object?> transform)
     {
+        if (_methodConfig.MethodInfo.ReturnType.GetTypeWithoutTask() != typeof(P))
+        {
+            throw new ArgumentException($"Returns method must have generic parameter the same as method return type, which is {_methodConfig.MethodInfo.ReturnType}");
+        }
         _methodConfig.ReturnTransform = transform;
         return this;
     }
 
+    IVerifyFuncTransform IVerifyFuncTransform.NoReturn()
+    {
+        _methodConfig.ShouldNotReturnValue = true;
+        return this;
+    }
 }

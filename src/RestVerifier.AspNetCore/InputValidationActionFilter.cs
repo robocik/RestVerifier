@@ -21,38 +21,48 @@ public class InputValidationActionFilter : IActionFilter
         var validator = _requestValidator.Validator;
         if (validator != null)
         {
-            if (validator.ValidateParams(context.ActionArguments))
+            try
             {
-                if (context.ActionDescriptor is ControllerActionDescriptor method)
+                validator.ReachEndpoint();
+                if (validator.ValidateParams(context.ActionArguments))
                 {
+                    if (context.ActionDescriptor is ControllerActionDescriptor method)
+                    {
 
-                    Type? returnType = method.MethodInfo.ReturnType;
-                    if (returnType.IsVoid())
-                    {
-                        context.Result = new NoContentResult();
-                        return;
-                    }
-                    if (returnType == typeof(IActionResult) || returnType == typeof(Task<IActionResult>))
-                    {
-                        returnType = null;
-                    }
-
-                    var returnObj = validator.AddReturnType(returnType);
-
-                    if (returnObj is IActionResult ar)
-                    {
-                        context.Result = ar;
-                    }
-                    else
-                    {
-                        context.Result = new ObjectResult(returnObj)
+                        Type? returnType = method.MethodInfo.ReturnType;
+                        if (returnType.IsVoid())
                         {
-                            StatusCode = 200
-                        };
-                    }
+                            context.Result = new NoContentResult();
+                            return;
+                        }
+                        if (returnType == typeof(IActionResult) || returnType == typeof(Task<IActionResult>))
+                        {
+                            returnType = null;
+                        }
 
+                        var returnObj = validator.AddReturnType(returnType);
+
+                        if (returnObj is IActionResult ar)
+                        {
+                            context.Result = ar;
+                        }
+                        else
+                        {
+                            context.Result = new ObjectResult(returnObj)
+                            {
+                                StatusCode = 200
+                            };
+                        }
+
+                    }
                 }
             }
+            catch (Exception e)
+            {
+                validator.AddException(e);
+                throw;
+            }
+            
         }
         
     }

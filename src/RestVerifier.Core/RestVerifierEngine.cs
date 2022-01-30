@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using RestVerifier.Core.Configurator;
 using RestVerifier.Core.Interfaces;
@@ -55,8 +57,11 @@ public class RestVerifierEngine<TClient> where TClient: notnull
                 {
                     continue;
                 }
-                    
 
+                if (methodInfo.Name == "WrongAsync")
+                {
+                    Debug.Write("");
+                }
                 if (methodInfo.IsGenericMethodDefinition)
                 {
                     if (methodConfig.GenericParameters.Length != methodInfo.GetGenericArguments().Length)
@@ -83,6 +88,9 @@ public class RestVerifierEngine<TClient> where TClient: notnull
                 {
                     returnObj = ValidationContext.NotSet;
                 }
+
+                Validator.ThrowIfExceptions();
+                Validator.ThrowIfNotReachEndpoint();
                 Validator.ValidateReturnValue(returnObj);
                 context.Result = ExecutionResult.Success;
                 await InvokeMethodExecuted(context);
@@ -103,18 +111,26 @@ public class RestVerifierEngine<TClient> where TClient: notnull
 
     private async Task HandleException(ExecutionContext context, Exception exception, int index, MethodInfo[] methods, MethodInfo methodInfo)
     {
+        
         context.Result = ExecutionResult.Error;
-        context.Exception = exception;
+        
         if (exception is TargetInvocationException target)
         {
-            context.Exception = target.InnerException;
+            exception = target.InnerException;
         }
-        context.Abort = true;
 
+        var listOfExceptions = new List<Exception>();
+        listOfExceptions.Add(exception);
+        listOfExceptions.AddRange(Validator.Context.Exceptions);
+
+        var newException = new VerifierExecutionException(context.Method,
+            $"Execution of {index + 1}/{methods.Length}: {methodInfo.Name} failed", listOfExceptions);
+        context.Exception = newException;
+        context.Abort = true;
         await InvokeMethodExecuted(context);
         if (context.Abort)
         {
-            throw new VerifierExecutionException(context.Method, $"Execution of {index + 1}/{methods.Length}: {methodInfo.Name} failed", context.Exception!);
+            throw newException;
         }
     }
 

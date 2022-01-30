@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace RestVerifier.Core;
 
 
-public class VerifierExecutionException : Exception
+public class VerifierExecutionException : AggregateException
 {
     public MethodInfo Method { get; }
     public VerifierExecutionException(MethodInfo method)
@@ -18,14 +19,25 @@ public class VerifierExecutionException : Exception
         Method = method;
     }
 
-    public VerifierExecutionException(MethodInfo method,string message, Exception innerException)
-        : base(message, innerException)
+    public VerifierExecutionException(MethodInfo method,string message, params Exception[] innerExceptions)
+        : base(message, innerExceptions)
     {
         Method = method;
     }
 
-    public VerifierExecutionException(MethodInfo method,  Exception innerException)
-        : base($"Execution of {method.Name} failed", innerException)
+    public VerifierExecutionException(MethodInfo method, string message, IEnumerable<Exception> innerExceptions)
+        : base(message, innerExceptions)
+    {
+        Method = method;
+    }
+
+    public VerifierExecutionException(MethodInfo method, params Exception[] innerExceptions)
+        : base($"Execution of {method.Name} failed", innerExceptions)
+    {
+        Method = method;
+    }
+    public VerifierExecutionException(MethodInfo method, IEnumerable<Exception> innerExceptions)
+        : base($"Execution of {method.Name} failed", innerExceptions)
     {
         Method = method;
     }
