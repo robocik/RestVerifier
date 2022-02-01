@@ -18,6 +18,8 @@ public interface IVerifyTransform
 
     IVerifyTransform NoReturn();
 
+    IVerifyTransform SuppressExceptionHandling();
+
 }
 
 public interface IVerifyFuncTransform
@@ -37,4 +39,6 @@ public interface IVerifyFuncTransform
     IVerifyFuncTransform Transform(Func<object?[], object?[]> method);
 
     IVerifyFuncTransform NoReturn();
+
+    IVerifyFuncTransform SuppressCheckExceptionHandling();
 }

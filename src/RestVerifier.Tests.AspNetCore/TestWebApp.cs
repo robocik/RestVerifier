@@ -249,4 +249,53 @@ class TestWebApp
         var engine = _builder.Build();
         await engine.TestService();
     }
+
+    [Test]
+    public async Task test_exception_handling_correct_handling()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.GetPersonNoReturn(Behavior.Transform<PersonDTO>(h => h.Id))).NoReturn();
+        });
+        _builder.CheckExceptionHandling<InvalidOperationException>();
+        var engine = _builder.Build();
+        await engine.TestService();
+    }
+
+    [Test]
+    public async Task test_exception_handling_incorrect_handling()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.WrongExceptionHandling(Behavior.Transform<PersonDTO>(h => h.Id)));
+        });
+        _builder.CheckExceptionHandling<InvalidOperationException>();
+        var engine = _builder.Build();
+        var ex=Assert.ThrowsAsync<VerifierExecutionException>(()=>engine.TestService());
+        Assert.IsTrue(ex.Message.Contains("handling") && ex.Message.Contains(typeof(InvalidOperationException).ToString()));
+    }
+
+    [Test]
+    public async Task test_exception_handling_incorrect_handling_but_suppressing()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.WrongExceptionHandling(Behavior.Transform<PersonDTO>(h => h.Id))).SuppressCheckExceptionHandling();
+        });
+        _builder.CheckExceptionHandling<InvalidOperationException>();
+        var engine = _builder.Build();
+        await engine.TestService();
+    }
+
+    [Test]
+    public async Task test_exception_handling_correct_handling_for_void_action_method()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.GetMethod2Void());
+        });
+        _builder.CheckExceptionHandling<InvalidOperationException>();
+        var engine = _builder.Build();
+        await engine.TestService();
+    }
 }

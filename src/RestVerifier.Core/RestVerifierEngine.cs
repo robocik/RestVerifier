@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RestVerifier.Core.Configurator;
 using RestVerifier.Core.Interfaces;
+using RestVerifier.Core.MethodInvokers;
 
 namespace RestVerifier.Core;
 
@@ -43,7 +44,8 @@ public class RestVerifierEngine<TClient> where TClient: notnull
         var client = await _builder.CreateClient(Validator);
         var methods = GetMethods();
 
-        var paramBuilder = new ParameterBuilder(_builder.Configuration, Validator);
+        var methodInvokers = GetMethodInvokers();
+        
         for (var index = 0; index < methods.Length; index++)
         {
 
@@ -58,10 +60,6 @@ public class RestVerifierEngine<TClient> where TClient: notnull
                     continue;
                 }
 
-                if (methodInfo.Name == "WrongAsync")
-                {
-                    Debug.Write("");
-                }
                 if (methodInfo.IsGenericMethodDefinition)
                 {
                     if (methodConfig.GenericParameters.Length != methodInfo.GetGenericArguments().Length)
@@ -75,24 +73,12 @@ public class RestVerifierEngine<TClient> where TClient: notnull
                 Console.WriteLine("METHOD: " + methodInfo.Name + " - " + index);
                 Validator.Reset(methodConfig);
 
-                var parameters = methodInfo.GetParameters();
-                IList<object?> values = paramBuilder.AddParameters(methodConfig, parameters);
-                
                 await InvokeMethodExecuting(context);
-                if (context.Abort)
-                {
-                    return;
-                }
-                var returnObj = await InvokeMethod(methodInfo, client, values.ToArray());
-                if (methodInfo.ReturnType.IsVoid())
-                {
-                    returnObj = ValidationContext.NotSet;
-                }
 
-                Validator.ThrowIfExceptions();
-                Validator.ThrowIfNotReachEndpoint();
-                Validator.ValidateReturnValue(returnObj);
-                context.Result = ExecutionResult.Success;
+                foreach (var invoker in methodInvokers)
+                {
+                    await invoker.Invoke(methodInfo,methodConfig, client, context);
+                }
                 await InvokeMethodExecuted(context);
                 if (context.Abort)
                 {
@@ -107,6 +93,14 @@ public class RestVerifierEngine<TClient> where TClient: notnull
 
 
         }
+    }
+
+    private IEnumerable<IMethodInvoker> GetMethodInvokers()
+    {
+        var list = new List<IMethodInvoker>();
+        list.Add(new NormalInvoker(Validator,_builder.Configuration));
+        list.Add(new ThrowExceptionInvoker(Validator, _builder.Configuration));
+        return list;
     }
 
     private async Task HandleException(ExecutionContext context, Exception exception, int index, MethodInfo[] methods, MethodInfo methodInfo)
@@ -176,25 +170,7 @@ public class RestVerifierEngine<TClient> where TClient: notnull
 
     
 
-    protected virtual async Task<object?> InvokeMethod(MethodInfo methodInfo, object client, object?[] values)
-    {
-
-        var result = methodInfo.Invoke(client, values);
-        if (result is Task task)
-        {
-            await task;
-            if (methodInfo.ReturnType.IsGenericType)
-            {
-                result = methodInfo.ReturnType.GetProperty("Result")!.GetValue(task);
-            }
-            else
-            {
-                result = null;
-            }
-        }
-
-        return result;
-    }
+    
     
     
 }

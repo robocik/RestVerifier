@@ -9,7 +9,7 @@ namespace RestVerifier.Tests.AspNetCore.ClientAccess;
 
 public abstract class DataServiceBase
 {
-    private readonly HttpClient _httpClient;
+    protected readonly HttpClient _httpClient;
 
     protected DataServiceBase(HttpClient httpClient)
     {

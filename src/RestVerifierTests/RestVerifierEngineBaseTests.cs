@@ -282,7 +282,7 @@ public class RestVerifierEngineBaseTests
     }
 
     [Test]
-    public async Task different_return_types_but_no_returns_transformation()
+    public void different_return_types_but_no_returns_transformation()
     {
         _builder.ConfigureSetup(x =>
             {

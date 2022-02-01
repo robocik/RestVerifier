@@ -32,13 +32,25 @@ public class CompareRequestValidator
     public IRemoteServiceContext Context => _context;
     public IObjectsComparer Comparer => _comparer;
     public bool ShouldValidateReachEndpoint { get; set; }
+    public Type? ExceptionToThrow { get; set; }
 
+
+    public void ThrowTestException()
+    {
+        if (ExceptionToThrow != null)
+        {
+            var exception = (Exception)Activator.CreateInstance(ExceptionToThrow);
+            throw exception;
+        }
+    }
     public object? AddReturnType(Type? type)
     {
         if (_currentMethod == null)
         {
             throw new ArgumentNullException("_currentMethod");
         }
+
+        
         var builder = new ReturnValueBuilder(_configuration, this);
         return builder.AddReturnType(_currentMethod, type);
     }

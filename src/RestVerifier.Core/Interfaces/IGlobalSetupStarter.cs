@@ -35,4 +35,5 @@ public interface IGlobalSetupStarter<TClient> where TClient: notnull
     IGlobalSetupStarter<TClient> UsePositionMatchingStrategy();
 
 
+    IGlobalSetupStarter<TClient> CheckExceptionHandling<T>() where T : Exception;
 }

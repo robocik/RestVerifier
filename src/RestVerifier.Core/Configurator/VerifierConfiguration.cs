@@ -49,5 +49,6 @@ public sealed class VerifierConfiguration
     }
 
     public Func<ExecutionContext, Task>? MethodExecuting { get; internal set; }
-    public Func<ExecutionContext, Task>? MethodExecuted { get; internal set; } 
+    public Func<ExecutionContext, Task>? MethodExecuted { get; internal set; }
+    public IList<Type> ExceptionsToCheck { get; } = new List<Type>();
 }

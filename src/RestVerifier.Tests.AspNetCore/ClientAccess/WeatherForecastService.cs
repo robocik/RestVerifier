@@ -1,4 +1,5 @@
-﻿using RestVerifier.Tests.AspNetCore.Model;
+﻿using Newtonsoft.Json;
+using RestVerifier.Tests.AspNetCore.Model;
 
 namespace RestVerifier.Tests.AspNetCore.ClientAccess;
 
@@ -152,5 +153,16 @@ public class WeatherForecastService: DataServiceBase
             var res = httpClient.GetFromJsonAsync<PersonDTO>(url, CreateOptions()).ConfigureAwait(false);
             return res!;
         }).ConfigureAwait(false);
+    }
+
+    public async Task<PersonDTO> WrongExceptionHandling(PersonDTO person)
+    {
+        var url = GetUrl($"weatherforecast/GetPerson?id={person.Id}");
+
+        var res =await  _httpClient.GetAsync(url).ConfigureAwait(false);
+        
+        var json = await res.Content.ReadAsStringAsync();
+
+        return JsonConvert.DeserializeObject<PersonDTO>(json, CreateOptions());
     }
 }

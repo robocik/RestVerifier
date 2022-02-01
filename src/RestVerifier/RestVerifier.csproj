@@ -5,7 +5,7 @@
 	  <LangVersion>latest</LangVersion>
 	  <Nullable>enable</Nullable>
 
-	  <Version>1.0.2</Version>
+	  <Version>1.1.0</Version>
 	  <Title>RestVerifier</Title>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <RepositoryType>git</RepositoryType>
@@ -17,6 +17,8 @@
 	  <Copyright>Copyright © Robocik 2022</Copyright>
 	  <Description>RestVerifier makes it very easy for developers to test and verify entire communication between Client application and the Server, especially you can easly check if all objects sent between Client &lt;--&gt; Server are serialized/deserialized correctly. This package is just an entry point which simplify usage.</Description>
 	  <PackageIcon>logoRV.png</PackageIcon>
+	  <BaseOutputPath>..\..\out</BaseOutputPath>
+	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

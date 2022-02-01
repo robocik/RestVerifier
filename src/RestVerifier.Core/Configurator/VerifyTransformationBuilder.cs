@@ -66,6 +66,18 @@ sealed class VerifyTransformationBuilder : IVerifyFuncTransform,IVerifyTransform
         return this;
     }
 
+    IVerifyTransform IVerifyTransform.SuppressExceptionHandling()
+    {
+        _methodConfig.SuppressExceptionHandling = true;
+        return this;
+    }
+
+    IVerifyFuncTransform IVerifyFuncTransform.SuppressCheckExceptionHandling()
+    {
+        _methodConfig.SuppressExceptionHandling = true;
+        return this;
+    }
+
     IVerifyTransform IVerifyTransform.Transform<P1>(Func<P1, object?[]> method)
     {
         _methodConfig.Transform = method;

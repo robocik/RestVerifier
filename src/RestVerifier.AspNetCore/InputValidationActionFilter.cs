@@ -24,11 +24,12 @@ public class InputValidationActionFilter : IActionFilter
             try
             {
                 validator.ReachEndpoint();
+                validator.ThrowTestException();
                 if (validator.ValidateParams(context.ActionArguments))
                 {
                     if (context.ActionDescriptor is ControllerActionDescriptor method)
                     {
-
+                        
                         Type? returnType = method.MethodInfo.ReturnType;
                         if (returnType.IsVoid())
                         {
@@ -39,7 +40,7 @@ public class InputValidationActionFilter : IActionFilter
                         {
                             returnType = null;
                         }
-
+                       
                         var returnObj = validator.AddReturnType(returnType);
 
                         if (returnObj is IActionResult ar)

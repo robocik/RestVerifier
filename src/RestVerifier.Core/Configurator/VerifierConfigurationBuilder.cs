@@ -42,6 +42,13 @@ public sealed class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<
         _matchStrategy = new PositionMatchStrategy();
         return this;
     }
+
+    public IGlobalSetupStarter<TClient> CheckExceptionHandling<T>() where T:Exception
+    {
+        Configuration.ExceptionsToCheck.Add(typeof(T));
+        return this;
+    }
+
     private ISetupMethod SetupImplementation(Expression method)
     {
         LambdaExpression lambda = (LambdaExpression)method;
