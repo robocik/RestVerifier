@@ -122,7 +122,7 @@ We have used RestVerifier to make this verification and guess what. We have foun
 - sometimes we use different parameter names on both sides
 - sometimes we forgot to add [FromBody] attribute
 - sometimes we forgot to change route URL
-- sometimes we pass wrong class (for example with Properties returnes interfaces instead of classes etc)
+- sometimes we pass wrong class (for example with Properties returns interfaces instead of classes etc)
 - sometimes we have pass custom structure but we didn't have custom model binder 
 - sometimes we even forgot to migrate specific server method to ASP.NET
 
