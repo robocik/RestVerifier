@@ -17,6 +17,7 @@
 	  <Copyright>Copyright © Robocik 2022</Copyright>
 	  <Description>This extension allows you to use FluentAssertions library for comparing test objects when you use RestVerifier library.</Description>
 	  <PackageIcon>logoRV.png</PackageIcon>
+	  <BaseOutputPath>..\..\out</BaseOutputPath>
 	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
@@ -29,5 +30,10 @@
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\RestVerifier.Core\RestVerifier.Core.csproj" />
+	  <ProjectReference Include="..\RestVerifier\RestVerifier.csproj" />
 	</ItemGroup>
 </Project>
