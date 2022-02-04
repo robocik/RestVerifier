@@ -67,5 +67,11 @@ namespace RestVerifier.Tests.AspNetCore.Controllers
         {
             return null;
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteNote(Guid? id)
+        {
+            return Ok();
+        }
     }
 }

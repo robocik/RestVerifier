@@ -31,17 +31,19 @@ public class InputValidationActionFilter : IActionFilter
                     {
                         
                         Type? returnType = method.MethodInfo.ReturnType;
-                        if (returnType.IsVoid())
-                        {
-                            context.Result = new NoContentResult();
-                            return;
-                        }
                         if (returnType == typeof(IActionResult) || returnType == typeof(Task<IActionResult>))
                         {
                             returnType = null;
                         }
+                        
                        
                         var returnObj = validator.AddReturnType(returnType);
+
+                        if (returnObj==ValidationContext.NotSet)
+                        {
+                            context.Result = new NoContentResult();
+                            return;
+                        }
 
                         if (returnObj is IActionResult ar)
                         {

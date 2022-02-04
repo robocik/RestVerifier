@@ -62,7 +62,7 @@ class TestWebApp
         });
         var engine = _builder.Build();
         var exception=Assert.ThrowsAsync<VerifierExecutionException>(()=>engine.TestService());
-        Assert.IsTrue(exception!.InnerException is ArgumentOutOfRangeException);
+        Assert.IsTrue(exception!.InnerExceptions.Any(b=>b is InvalidCastException));
     }
 
     [Test]
@@ -295,6 +295,17 @@ class TestWebApp
             x.Verify(b => b.GetMethod2Void());
         });
         _builder.CheckExceptionHandling<InvalidOperationException>();
+        var engine = _builder.Build();
+        await engine.TestService();
+    }
+
+    [Test]
+    public async Task test()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.DeleteNote(Behavior.Verify<Guid>()));
+        });
         var engine = _builder.Build();
         await engine.TestService();
     }

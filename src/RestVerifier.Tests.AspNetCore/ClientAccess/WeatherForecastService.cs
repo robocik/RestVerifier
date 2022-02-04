@@ -165,4 +165,12 @@ public class WeatherForecastService: DataServiceBase
 
         return JsonConvert.DeserializeObject<PersonDTO>(json, CreateOptions());
     }
+
+    public Task DeleteNote(Guid id)
+    {
+        return Execute(httpClient =>
+        {
+            return httpClient.DeleteAsync($"weatherforecast/{id}");
+        });
+    }
 }
