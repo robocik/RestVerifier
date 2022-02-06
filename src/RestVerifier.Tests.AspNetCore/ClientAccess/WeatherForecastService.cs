@@ -56,6 +56,18 @@ public class WeatherForecastService: DataServiceBase
         }).ConfigureAwait(false);
     }
 
+
+    public async Task<PersonDTO> GetPersonWithAdditionalParameter(Guid id,int retry)
+    {
+        var url = GetUrl($"weatherforecast/GetPerson?id={id}");
+
+        return await Execute(async httpClient =>
+        {
+            var res = await httpClient.GetFromJsonAsync<PersonDTO>(url, CreateOptions()).ConfigureAwait(false);
+            return res!;
+        }).ConfigureAwait(false);
+    }
+
     public async Task<PersonDTO> GetPersonAction(Guid id)
     {
         var url = GetUrl($"weatherforecast/GetPersonAction?id={id}");
@@ -172,5 +184,21 @@ public class WeatherForecastService: DataServiceBase
         {
             return httpClient.DeleteAsync($"weatherforecast/{id}");
         });
+    }
+
+    public async Task<Stream> GetFileContent(string name)
+    {
+        var url = GetUrl($"weatherforecast/GetFileContent?name={name}");
+
+        return await Execute(async httpClient =>
+        {
+            var result = await httpClient.GetAsync(url);
+            if (!result.IsSuccessStatusCode)
+            {
+                await result.ConvertToException();
+            }
+            var stream = await result.Content.ReadAsStreamAsync();
+            return stream;
+        }).ConfigureAwait(false);
     }
 }

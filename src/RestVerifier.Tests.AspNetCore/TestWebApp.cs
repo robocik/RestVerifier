@@ -1,7 +1,10 @@
 ﻿using System.Text.Json;
+using AutoFixture;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.TestHost;
 using NUnit.Framework;
 using RestVerifier.AspNetCore;
+using RestVerifier.AutoFixture;
 using RestVerifier.Core;
 using RestVerifier.Core.Configurator;
 using RestVerifier.Core.Interfaces;
@@ -30,6 +33,8 @@ class TestWebApp
     [SetUp]
     public void CreateTest()
     {
+        var creator = ConfigureAutoFixtureBuilder();
+
         _builder = Engine.CreateDefaultBuilder<WeatherForecastService>();
 
         _builder.SetMode(EngineMode.Strict);
@@ -40,6 +45,16 @@ class TestWebApp
             var client = new WeatherForecastService(httpClient);
             return Task.FromResult(client);
         });
+
+        _builder.UseObjectCreator(creator);
+        _builder.UseComparer<TestComparer>();
+    }
+
+    private static AutoFixtureObjectCreator ConfigureAutoFixtureBuilder()
+    {
+        var creator = new AutoFixtureObjectCreator();
+        creator.Fixture.Register<byte[], Stream>((byte[] data) => new MemoryStream(data));
+        return creator;
     }
 
     [Test]
@@ -305,6 +320,36 @@ class TestWebApp
         _builder.ConfigureVerify(x =>
         {
             x.Verify(b => b.DeleteNote(Behavior.Verify<Guid>()));
+        });
+        var engine = _builder.Build();
+        await engine.TestService();
+    }
+
+    [Test]
+    public async Task ignore_parameter()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.GetPersonWithAdditionalParameter(Behavior.Verify<Guid>(),Behavior.Ignore<int>()));
+        });
+        var engine = _builder.Build();
+        await engine.TestService();
+    }
+
+    [Test]
+    public async Task get_file_transform_return()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.GetFileContent(Behavior.Verify<string>())).Returns<Stream>(stream =>
+            {
+                var memory = (MemoryStream)stream;
+                var newMemory = new MemoryStream();
+                memory.CopyTo(newMemory);
+                newMemory.Position = 0;
+                memory.Position = 0;
+                return new FileStreamResult(newMemory, "text/json");
+            });
         });
         var engine = _builder.Build();
         await engine.TestService();

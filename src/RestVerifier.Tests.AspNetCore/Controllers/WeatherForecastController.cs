@@ -73,5 +73,11 @@ namespace RestVerifier.Tests.AspNetCore.Controllers
         {
             return Ok();
         }
+
+        [HttpGet("GetFileContent")]
+        public FileStreamResult GetFileContent(string name)
+        {
+            return null;
+        }
     }
 }
