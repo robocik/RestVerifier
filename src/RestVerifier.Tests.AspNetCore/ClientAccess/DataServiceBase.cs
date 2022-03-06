@@ -28,7 +28,7 @@ public abstract class DataServiceBase
         return options;
     }
 
-    protected string GetUrl(string urlPart, object? param = null)
+    protected string GetUrl(string urlPart, object param = null)
     {
         var query = param?.ToQueryString();
         var url = urlPart;
@@ -41,7 +41,7 @@ public abstract class DataServiceBase
 
     protected async Task<T> Execute<T>(Func<HttpClient, Task<T>> method)
     {
-        T? res = default;
+        T res = default;
         try
         {
             res = await method(_httpClient).ConfigureAwait(false);
@@ -70,7 +70,7 @@ public abstract class DataServiceBase
         convertToException(response.StatusCode, errorDetails?.Message, errorDetails?.ServiceError);
     }
 
-    private void convertToException(HttpStatusCode? statusCode, string? message, ServiceError? error = ServiceError.Unknown)
+    private void convertToException(HttpStatusCode? statusCode, string message, ServiceError? error = ServiceError.Unknown)
     {
         error ??= ServiceError.Unknown;
         message ??= "Unknown exception occured";

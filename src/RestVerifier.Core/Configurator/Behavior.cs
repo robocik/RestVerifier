@@ -5,6 +5,14 @@ namespace RestVerifier.Core.Configurator;
 
 public sealed class Behavior
 {
+    public static T Verify<T>(T ignoreValue)
+    {
+        return default(T)!;
+    }
+    public static T Verify<T>(T ignoreValue, string actionParameterName )
+    {
+        return default(T)!;
+    }
     public static T Verify<T>(string actionParameterName)
     {
         return default(T)!;

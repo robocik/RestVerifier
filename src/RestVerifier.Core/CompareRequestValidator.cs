@@ -58,7 +58,7 @@ public class CompareRequestValidator
     public bool ValidateParams(IDictionary<string, object?> contextActionArguments)
     {
         var values = _context.ValuesToCompare.ToList();
-        Comparer.Compare(contextActionArguments.Count, values.Count);
+        Comparer.Compare(contextActionArguments.Count, values.Count,"there is a difference between retrieved data count in your Action method and parameters count pass to the client method");
 
         if (contextActionArguments.Values.Count > 0)
         {
@@ -75,7 +75,7 @@ public class CompareRequestValidator
         {
             throw new ArgumentOutOfRangeException("ReturnType","No return value. Probably your controller method is void but your client method has different return type");
         }
-        Comparer.Compare(returnValue, _context.ReturnObject);
+        Comparer.Compare(returnValue, _context.ReturnObject,"value returned from Action method is different to what we expected to retrieve.");
     }
 
     public void Reset(MethodConfiguration methodConfiguration)

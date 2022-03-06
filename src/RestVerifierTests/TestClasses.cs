@@ -115,4 +115,5 @@ class TestClient
         var res = (TestParam)RequestValidator.AddReturnType(typeof(string));
         return res;
     }
+    
 }

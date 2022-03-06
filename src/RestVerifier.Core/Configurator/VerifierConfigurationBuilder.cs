@@ -139,12 +139,7 @@ public sealed class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<
                     }
                     else if (mce.Method.DeclaringType == typeof(Behavior) && mce.Method.Name == nameof(Behavior.Verify))
                     {
-                        var param=mce.Method.GetParameters();
-                        if (mce.Arguments.Count==1)
-                        {
-                            var actionParamNameExpression=(ConstantExpression)mce.Arguments[0];
-                            paramConfig.Name = (string?)actionParamNameExpression.Value;
-                        }
+                        VerifyBehaviorConfiguration(mce, paramConfig);
                     }
                     if (mce.Method.DeclaringType == typeof(Behavior) && mce.Method.Name == nameof(Behavior.Generate))
                     {
@@ -183,6 +178,25 @@ public sealed class VerifierConfigurationBuilder<TClient> : IGlobalSetupStarter<
         }
 
         throw new ArgumentException("This construction is not supported");
+    }
+
+    private static void VerifyBehaviorConfiguration(MethodCallExpression mce, ParameterConfiguration paramConfig)
+    {
+        var list = mce.Method.GetParameters();
+        for (int i = 0; i < list.Length; i++)
+        {
+            var param = list[i];
+            if (param.Name == "actionParameterName")
+            {
+                var actionParamNameExpression = (ConstantExpression)mce.Arguments[0];
+                paramConfig.Name = (string?)actionParamNameExpression.Value;
+            }
+            else if (param.Name == "ignoreValue")
+            {
+                var ignoreValueExpression = (ConstantExpression)mce.Arguments[0];
+                paramConfig.IgnoreValue = ignoreValueExpression.Value;
+            }
+        }
     }
 
     private MethodConfiguration CreateMethodConfiguration(MethodCallExpression methodExpression )

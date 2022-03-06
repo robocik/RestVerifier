@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.WebUtilities;
+using Newtonsoft.Json;
 using RestVerifier.Tests.AspNetCore.Model;
 
 namespace RestVerifier.Tests.AspNetCore.ClientAccess;
@@ -199,6 +200,20 @@ public class WeatherForecastService: DataServiceBase
             }
             var stream = await result.Content.ReadAsStreamAsync();
             return stream;
+        }).ConfigureAwait(false);
+    }
+
+    public async Task<int> GetStatus(int value,byte testMode)
+    {
+        var url = GetUrl($"weatherforecast/GetStatus?value={value}");
+        if (testMode!=0)
+        {
+            url = QueryHelpers.AddQueryString(url, "testMode", testMode.ToString());
+        }
+        return await Execute(async httpClient =>
+        {
+            var res = await httpClient.GetFromJsonAsync<int>(url, CreateOptions()).ConfigureAwait(false);
+            return res!;
         }).ConfigureAwait(false);
     }
 }

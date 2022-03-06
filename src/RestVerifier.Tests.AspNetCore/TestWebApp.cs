@@ -278,7 +278,7 @@ class TestWebApp
     }
 
     [Test]
-    public async Task test_exception_handling_incorrect_handling()
+    public Task test_exception_handling_incorrect_handling()
     {
         _builder.ConfigureVerify(x =>
         {
@@ -288,6 +288,7 @@ class TestWebApp
         var engine = _builder.Build();
         var ex=Assert.ThrowsAsync<VerifierExecutionException>(()=>engine.TestService());
         Assert.IsTrue(ex.Message.Contains("handling") && ex.Message.Contains(typeof(InvalidOperationException).ToString()));
+        return Task.CompletedTask;
     }
 
     [Test]
@@ -354,4 +355,21 @@ class TestWebApp
         var engine = _builder.Build();
         await engine.TestService();
     }
+
+    [Test]
+    public async Task set_parameter_if_not_default_value()
+    {
+        _builder.ConfigureSetup(x =>
+        {
+            x.Setup(b => b.GetStatus(Behavior.Generate<int>(), 0));
+        });
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.GetStatus(Behavior.Verify<int>(),Behavior.Verify<byte>(0)));
+        });
+        var engine = _builder.Build();
+        await engine.TestService();
+
+    }
+
 }

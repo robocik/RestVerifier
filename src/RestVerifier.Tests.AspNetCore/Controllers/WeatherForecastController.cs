@@ -69,15 +69,21 @@ namespace RestVerifier.Tests.AspNetCore.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteNote(Guid? id)
+        public Task<IActionResult> DeleteNote(Guid? id)
         {
-            return Ok();
+            return Task.FromResult<IActionResult>(Ok());
         }
 
         [HttpGet("GetFileContent")]
         public FileStreamResult GetFileContent(string name)
         {
             return null;
+        }
+
+        [HttpGet("GetStatus")]
+        public int GetStatus(int value, byte testMode)
+        {
+            return 0;
         }
     }
 }

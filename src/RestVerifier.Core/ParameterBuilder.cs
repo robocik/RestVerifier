@@ -40,6 +40,10 @@ sealed class ParameterBuilder
             paramValue.Value = EvaluateInitialValue(paramConfig, parameterInfo);
 
             paramValue.ValueToCompare = EvaluateVerifyValue(paramConfig, paramValue);
+            if (paramConfig!=null && Equals(paramValue.ValueToCompare,paramConfig.IgnoreValue))
+            {
+                paramValue.Ignore = true;
+            }
             _configuration.VerifyParameterAction?.Invoke(parameterInfo, paramValue);
             list.Add(paramValue);
         }
