@@ -356,6 +356,20 @@ class TestWebApp
         await engine.TestService();
     }
 
+
+    [Test]
+    public async Task transform_with_greater_number_of_parameters()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.GetStatusWithSpecifiedMode(Behavior.Verify<int>())).Transform<int>(val =>
+            {
+                return new object[] { val, 1 };
+            });
+        });
+        var engine = _builder.Build();
+        await engine.TestService();
+    }
     [Test]
     public async Task set_parameter_if_not_default_value()
     {

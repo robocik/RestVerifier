@@ -216,4 +216,14 @@ public class WeatherForecastService: DataServiceBase
             return res!;
         }).ConfigureAwait(false);
     }
+
+    public async Task<int> GetStatusWithSpecifiedMode(int value)
+    {
+        var url = GetUrl($"weatherforecast/GetStatus?value={value}&testMode=1");
+        return await Execute(async httpClient =>
+        {
+            var res = await httpClient.GetFromJsonAsync<int>(url, CreateOptions()).ConfigureAwait(false);
+            return res!;
+        }).ConfigureAwait(false);
+    }
 }
