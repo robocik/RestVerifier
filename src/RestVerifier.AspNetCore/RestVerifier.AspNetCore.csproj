@@ -7,7 +7,7 @@
 		<Nullable>enable</Nullable>
 		<LangVersion>latest</LangVersion>
 
-		<Version>1.2.0</Version>
+		<Version>1.3.0</Version>
 		<Title>RestVerifier.AspNetCore</Title>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<RepositoryType>git</RepositoryType>
@@ -16,7 +16,7 @@
 		<Company>Roman Podstawa</Company>
 		<Authors>Roman Podstawa</Authors>
 		<PackageTags>testing;verification;validation;aspnetcore</PackageTags>
-		<Copyright>Copyright © Robocik 2022</Copyright>
+		<Copyright>Copyright © Robocik 2023</Copyright>
 		<Description>This extension integrate RestVerifier library with ASP.NET Core and allows you to verify correctnes of the communication with your WebAPI</Description>
 		<PackageIcon>logoRV.png</PackageIcon>
 		<BaseOutputPath>..\..\out</BaseOutputPath>

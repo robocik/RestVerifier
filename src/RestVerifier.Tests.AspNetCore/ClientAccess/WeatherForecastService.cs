@@ -179,6 +179,17 @@ public class WeatherForecastService: DataServiceBase
         return JsonConvert.DeserializeObject<PersonDTO>(json, CreateOptions());
     }
 
+    public async Task<PersonDTO> ExceptionHandlingChangeType(PersonDTO person)
+    {
+        var url = GetUrl($"weatherforecast/GetPersonWithException?id={person.Id}");
+
+        var res = await _httpClient.GetAsync(url).ConfigureAwait(false);
+        res.EnsureSuccessStatusCode();
+        var json = await res.Content.ReadAsStringAsync();
+
+        return JsonConvert.DeserializeObject<PersonDTO>(json, CreateOptions());
+    }
+
     public Task DeleteNote(Guid id)
     {
         return Execute(httpClient =>

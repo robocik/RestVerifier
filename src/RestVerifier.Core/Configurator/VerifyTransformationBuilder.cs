@@ -66,15 +66,15 @@ sealed class VerifyTransformationBuilder : IVerifyFuncTransform,IVerifyTransform
         return this;
     }
 
-    IVerifyTransform IVerifyTransform.SuppressExceptionHandling()
+    IVerifyTransform IVerifyTransform.ExceptionHandling(ExceptionHandling mode)
     {
-        _methodConfig.SuppressExceptionHandling = true;
+        _methodConfig.ExceptionHandling = mode;
         return this;
     }
 
-    IVerifyFuncTransform IVerifyFuncTransform.SuppressCheckExceptionHandling()
+    IVerifyFuncTransform IVerifyFuncTransform.ExceptionHandling(ExceptionHandling mode)
     {
-        _methodConfig.SuppressExceptionHandling = true;
+        _methodConfig.ExceptionHandling = mode;
         return this;
     }
 

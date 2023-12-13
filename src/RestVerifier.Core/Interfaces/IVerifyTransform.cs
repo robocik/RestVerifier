@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RestVerifier.Core.Configurator;
+using System;
 
 namespace RestVerifier.Core.Interfaces;
 
@@ -18,7 +19,7 @@ public interface IVerifyTransform
 
     IVerifyTransform NoReturn();
 
-    IVerifyTransform SuppressExceptionHandling();
+    IVerifyTransform ExceptionHandling(ExceptionHandling mode);
 
 }
 
@@ -40,5 +41,5 @@ public interface IVerifyFuncTransform
 
     IVerifyFuncTransform NoReturn();
 
-    IVerifyFuncTransform SuppressCheckExceptionHandling();
+    IVerifyFuncTransform ExceptionHandling(ExceptionHandling mode);
 }

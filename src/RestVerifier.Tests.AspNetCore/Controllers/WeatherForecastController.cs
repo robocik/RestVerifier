@@ -42,7 +42,12 @@ namespace RestVerifier.Tests.AspNetCore.Controllers
         {
             return null;
         }
-
+        [HttpGet("GetPersonWithException")]
+        public PersonDTO GetPersonWithException(Guid id)
+        {
+            throw new ObjectDisposedException("test");
+        }
+        
         [HttpGet("GetPersonAction")]
         public IActionResult GetPersonAction(Guid id)
         {

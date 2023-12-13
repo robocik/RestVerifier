@@ -296,11 +296,37 @@ class TestWebApp
     {
         _builder.ConfigureVerify(x =>
         {
-            x.Verify(b => b.WrongExceptionHandling(Behavior.Transform<PersonDTO>(h => h.Id))).SuppressCheckExceptionHandling();
+            x.Verify(b => b.WrongExceptionHandling(Behavior.Transform<PersonDTO>(h => h.Id))).ExceptionHandling(ExceptionHandling.Ignore);
         });
         _builder.CheckExceptionHandling<InvalidOperationException>();
         var engine = _builder.Build();
         await engine.TestService();
+    }
+
+    [Test]
+    public async Task test_exception_handling_incorrect_handling_but_without_checking_type()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.ExceptionHandlingChangeType(Behavior.Transform<PersonDTO>(h => h.Id))).ExceptionHandling(ExceptionHandling.ThrowButDontCheckType);
+        });
+        _builder.CheckExceptionHandling<InvalidOperationException>();
+        var engine = _builder.Build();
+        await engine.TestService();
+    }
+
+    [Test]
+    public Task test_exception_handling_incorrect_handling_but_with_checking_type()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.ExceptionHandlingChangeType(Behavior.Transform<PersonDTO>(h => h.Id))).ExceptionHandling(ExceptionHandling.ThrowAndCheckType);
+        });
+        _builder.CheckExceptionHandling<InvalidOperationException>();
+        var engine = _builder.Build();
+        var ex = Assert.ThrowsAsync<VerifierExecutionException>(() => engine.TestService());
+        Assert.IsTrue(ex.Message.Contains("but on the client side exception of type System.Net.Http.HttpRequestException has been thrown") && ex.Message.Contains(typeof(InvalidOperationException).ToString()));
+        return Task.CompletedTask;
     }
 
     [Test]

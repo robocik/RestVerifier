@@ -13,6 +13,12 @@ public enum VerifyBehavior
     Transform
 }
 
+public enum ExceptionHandling
+{
+    ThrowAndCheckType,
+    ThrowButDontCheckType,
+    Ignore
+}
 public sealed class MethodConfiguration
 {
     public MethodConfiguration(MethodInfo methodInfo)
@@ -30,5 +36,5 @@ public sealed class MethodConfiguration
     public Type[] GenericParameters { get; internal set; } = Array.Empty<Type>();
     public Type? ReturnType { get; internal set; }
     public bool ShouldNotReturnValue { get; set; }
-    public bool SuppressExceptionHandling { get; set; }
+    public ExceptionHandling ExceptionHandling { get; set; }= ExceptionHandling.ThrowAndCheckType;
 }

@@ -13,16 +13,17 @@ public class ThrowExceptionInvoker:MethodInvokerBase
     public override async Task Invoke(MethodInfo methodInfo, MethodConfiguration methodConfig, object client,
         ExecutionContext context)
     {
-        if (methodConfig.SuppressExceptionHandling)
+        if (methodConfig.ExceptionHandling==ExceptionHandling.Ignore)
         {
             return;
         }
         var paramBuilder = new ParameterBuilder(Configuration, Validator);
         var parameters = methodInfo.GetParameters();
-        IList<object?> values = paramBuilder.AddParameters(methodConfig, parameters);
+        var values = paramBuilder.AddParameters(methodConfig, parameters);
 
         foreach (var exception in Configuration.ExceptionsToCheck)
         {
+            
             Validator.ExceptionToThrow = exception;
             try
             {
@@ -31,7 +32,15 @@ public class ThrowExceptionInvoker:MethodInvokerBase
             }
             catch (Exception e) when (e is not VerifierExecutionException)
             {
-                context.Result = ExecutionResult.Success;
+                if (e.GetType() == exception || methodConfig.ExceptionHandling==ExceptionHandling.ThrowButDontCheckType)
+                {
+                    context.Result = ExecutionResult.Success;
+                }
+                else
+                {
+                    throw new VerifierExecutionException(methodInfo, $"During testing exception handling, we throw an exception of type {exception} but on the client side exception of type {e.GetType()} has been thrown. Please check if your client code handle exceptions correctly.");
+                }
+                
             }
 
         }
