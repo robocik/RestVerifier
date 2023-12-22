@@ -32,6 +32,10 @@ public class ThrowExceptionInvoker:MethodInvokerBase
             }
             catch (Exception e) when (e is not VerifierExecutionException)
             {
+                if (e is TargetInvocationException { InnerException: not null } tex)
+                {
+                    e=tex.InnerException;
+                }
                 if (e.GetType() == exception || methodConfig.ExceptionHandling==ExceptionHandling.ThrowButDontCheckType)
                 {
                     context.Result = ExecutionResult.Success;
