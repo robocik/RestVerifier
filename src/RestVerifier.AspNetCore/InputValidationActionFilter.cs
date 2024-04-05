@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -6,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using RestVerifier.Core;
 
 namespace RestVerifier.AspNetCore;
+
 
 public class InputValidationActionFilter : IActionFilter
 {
@@ -44,8 +47,11 @@ public class InputValidationActionFilter : IActionFilter
                             context.Result = new NoContentResult();
                             return;
                         }
-
-                        if (returnObj is IActionResult ar)
+                        if (returnObj is Stream stream)
+                        {
+                            context.Result = new NotDisposableFileStreamResult(stream, "application/octet-stream");
+                        }
+                        else if (returnObj is IActionResult ar)
                         {
                             context.Result = ar;
                         }

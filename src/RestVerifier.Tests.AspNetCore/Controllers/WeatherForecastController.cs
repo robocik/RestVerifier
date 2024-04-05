@@ -66,6 +66,12 @@ namespace RestVerifier.Tests.AspNetCore.Controllers
             return null;
         }
 
+        [HttpPost("GetFile")]
+        public Task<IActionResult> GetFile()
+        {
+            return null;
+        }
+
         [HttpGet("ParametersOrder")]
         [Produces("text/json")]
         public string ParametersOrder(string name,string address)

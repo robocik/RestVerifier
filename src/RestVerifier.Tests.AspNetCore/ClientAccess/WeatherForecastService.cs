@@ -124,6 +124,18 @@ public class WeatherForecastService: DataServiceBase
         }).ConfigureAwait(false);
     }
 
+    public async Task<Stream> GetFile()
+    {
+        var url = GetUrl($"weatherforecast/GetFile");
+
+        return await Execute(async httpClient =>
+        {
+            var res = await httpClient.PostAsEmptyJsonAsync(url, CreateOptions()).ConfigureAwait(false);
+            var result = await res.Content.ReadAsStreamAsync();
+            return result;
+        }).ConfigureAwait(false);
+    }
+
     public async Task<string> ParametersOrder(string address,string name)
     {
         var url = GetUrl($"weatherforecast/ParametersOrder?address={address}&name={name}");

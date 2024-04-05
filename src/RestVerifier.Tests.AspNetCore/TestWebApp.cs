@@ -160,6 +160,17 @@ class TestWebApp
         await engine.TestService();
     }
 
+
+    [Test]
+    public async Task controller_method_returns_iactionresult_but_in_client_code_we_returns_Stream()
+    {
+        _builder.ConfigureVerify(x =>
+        {
+            x.Verify(b => b.GetFile());
+        });
+        var engine = _builder.Build();
+        await engine.TestService();
+    }
     [Test]
     public async Task valuetuple_parameter()
     {
